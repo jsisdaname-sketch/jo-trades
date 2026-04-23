@@ -1,42 +1,29 @@
 const crypto = require('crypto');
-
 const BASE = 'https://api.snaptrade.com/api/v1';
 
-function snapHeaders(path, bodyStr = '') {
-  const clientId = process.env.SNAPTRADE_CLIENT_ID;
-  const consumerKey = process.env.SNAPTRADE_CONSUMER_KEY;
+function buildRequest(path, bodyObj = null, extraQuery = '') {
+  const clientId = process.env.SNAPTRADE_CLIENT_ID.trim();
+  const consumerKey = encodeURI(process.env.SNAPTRADE_CONSUMER_KEY.trim());
   const timestamp = Math.floor(Date.now() / 1000).toString();
-  const message = path + bodyStr + timestamp;
-  const sig = crypto.createHmac('sha256', consumerKey).update(message).digest('hex');
-  return {
-    'Content-Type': 'application/json',
-    'clientId': clientId,
-    'timestamp': timestamp,
-    'Signature': sig,
-  };
+  const query = `clientId=${clientId}&timestamp=${timestamp}${extraQuery ? '&' + extraQuery : ''}`;
+  const sigObject = { content: bodyObj || {}, path, query };
+  const sigContent = JSON.stringify(sigObject);
+  const signature = crypto.createHmac('sha256', consumerKey).update(sigContent).digest('base64');
+  return { url: `${BASE}${path}?${query}`, signature };
 }
 
-async function snapGet(path, params = {}) {
-  const query = new URLSearchParams(params).toString();
-  const fullPath = path + (query ? `?${query}` : '');
-  const res = await fetch(`${BASE}${fullPath}`, {
-    method: 'GET',
-    headers: snapHeaders(path),
-  });
-  if (!res.ok) throw new Error(`SnapTrade error ${res.status}: ${await res.text()}`);
+async function snapGet(path, extraQuery = '') {
+  const { url, signature } = buildRequest(path, null, extraQuery);
+  const res = await fetch(url, { headers: { 'Signature': signature } });
+  if (!res.ok) throw new Error(`SnapTrade ${res.status}: ${await res.text()}`);
   return res.json();
 }
 
-// Pair BUY + SELL orders for the same instrument into completed trades
 function pairOrders(orders) {
   const groups = {};
-
   for (const o of orders) {
     if (o.status !== 'FILLED') continue;
-
-    // Build instrument key
     let key, ticker, tradeType;
-
     if (o.option_symbol) {
       const opt = o.option_symbol;
       ticker = opt.underlying_symbol?.symbol || o.symbol?.symbol || 'UNKNOWN';
@@ -47,103 +34,43 @@ function pairOrders(orders) {
       tradeType = 'Long';
       key = `${ticker}_STOCK`;
     }
-
     if (!groups[key]) groups[key] = { ticker, tradeType, buys: [], sells: [] };
-
     const side = o.action === 'BUY' ? 'buys' : 'sells';
-    groups[key][side].push({
-      price: parseFloat(o.execution_price || 0),
-      qty: parseFloat(o.filled_quantity || 0),
-      date: o.time_placed,
-    });
+    groups[key][side].push({ price: parseFloat(o.execution_price || 0), qty: parseFloat(o.filled_quantity || 0), date: o.time_placed });
   }
-
   const trades = [];
-
   for (const key of Object.keys(groups)) {
     const { ticker, tradeType, buys, sells } = groups[key];
-
-    // Sort chronologically
     buys.sort((a, b) => new Date(a.date) - new Date(b.date));
     sells.sort((a, b) => new Date(a.date) - new Date(b.date));
-
     const pairs = Math.min(buys.length, sells.length);
-
     for (let i = 0; i < pairs; i++) {
-      const buy = buys[i];
-      const sell = sells[i];
-      const multiplier = tradeType === 'Call' || tradeType === 'Put' ? 100 : 1;
+      const buy = buys[i], sell = sells[i];
+      const multiplier = (tradeType === 'Call' || tradeType === 'Put') ? 100 : 1;
       const pnl = parseFloat(((sell.price - buy.price) * buy.qty * multiplier).toFixed(2));
-
-      trades.push({
-        id: `rh_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
-        ticker,
-        date: buy.date ? buy.date.split('T')[0] : '',
-        type: tradeType,
-        entry: buy.price,
-        exit: sell.price,
-        qty: buy.qty,
-        pnl,
-        outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
-        source: 'Robinhood',
-        notes: `Auto-synced from Robinhood`,
-        synced: true,
-      });
+      trades.push({ id: `rh_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ticker, date: buy.date ? buy.date.split('T')[0] : '', type: tradeType, entry: buy.price, exit: sell.price, qty: buy.qty, pnl, outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven', source: 'Robinhood', notes: 'Auto-synced from Robinhood', synced: true });
     }
-
-    // Unpaired buys = open positions, unpaired sells shouldn't exist
   }
-
   return trades;
 }
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') {
-    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type' } };
-  }
-
+  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
   const { userId, userSecret } = JSON.parse(event.body || '{}');
-
-  if (!userId || !userSecret) {
-    return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Missing credentials' }) };
-  }
+  if (!userId || !userSecret) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Missing credentials' }) };
 
   try {
-    // 1. Get all connected accounts
-    const accounts = await snapGet('/accounts', { userId, userSecret });
+    const accounts = await snapGet('/accounts', `userId=${userId}&userSecret=${userSecret}`);
+    if (!accounts || accounts.length === 0) return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades: [], message: 'No connected accounts. Please connect Robinhood first.' }) };
 
-    if (!accounts || accounts.length === 0) {
-      return {
-        statusCode: 200,
-        headers: { 'Access-Control-Allow-Origin': '*' },
-        body: JSON.stringify({ trades: [], message: 'No connected accounts found. Please connect Robinhood first.' }),
-      };
-    }
-
-    // 2. Fetch orders from all accounts
     const allOrders = [];
     for (const account of accounts) {
-      const orders = await snapGet(`/accounts/${account.id}/orders`, {
-        userId,
-        userSecret,
-        state: 'all',
-      });
+      const orders = await snapGet(`/accounts/${account.id}/orders`, `userId=${userId}&userSecret=${userSecret}&state=all`);
       if (Array.isArray(orders)) allOrders.push(...orders);
     }
-
-    // 3. Pair into completed trades
     const trades = pairOrders(allOrders);
-
-    return {
-      statusCode: 200,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ trades, totalOrders: allOrders.length }),
-    };
+    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades, totalOrders: allOrders.length }) };
   } catch (e) {
-    return {
-      statusCode: 500,
-      headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: e.message }),
-    };
+    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
   }
 };
