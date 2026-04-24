@@ -6,3 +6,13 @@
   from = "/robinhood-sync"
   to = "/robinhood-sync.html"
   status = 200
+
+[[redirects]]
+  from = "/api/get-trades"
+  to = "/.netlify/functions/get-trades"
+  status = 200
+
+[[redirects]]
+  from = "/api/save-trades"
+  to = "/.netlify/functions/save-trades"
+  status = 200
