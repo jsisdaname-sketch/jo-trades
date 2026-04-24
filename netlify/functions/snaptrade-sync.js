@@ -1,23 +1,4 @@
-const crypto = require('crypto');
-const BASE = 'https://api.snaptrade.com/api/v1';
-
-function buildRequest(path, bodyObj = null, extraQuery = '') {
-  const clientId = process.env.SNAPTRADE_CLIENT_ID.trim();
-  const consumerKey = encodeURI(process.env.SNAPTRADE_CONSUMER_KEY.trim());
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const query = `clientId=${clientId}&timestamp=${timestamp}${extraQuery ? '&' + extraQuery : ''}`;
-  const sigObject = { content: bodyObj || {}, path, query };
-  const signature = crypto.createHmac('sha256', consumerKey).update(JSON.stringify(sigObject)).digest('base64');
-  return { url: `${BASE}${path}?${query}`, signature };
-}
-
-async function snapGet(path, userId, userSecret) {
-  const extraQuery = `userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`;
-  const { url, signature } = buildRequest(path, null, extraQuery);
-  const res = await fetch(url, { headers: { 'Signature': signature } });
-  if (!res.ok) throw new Error(`SnapTrade ${res.status}: ${await res.text()}`);
-  return res.json();
-}
+const { Snaptrade } = require('snaptrade-typescript-sdk');
 
 function pairOrders(orders) {
   const groups = {};
@@ -61,29 +42,52 @@ function pairOrders(orders) {
 }
 
 exports.handler = async (event) => {
-  if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
-
-  const userId = 'JOTRADES';
-  const userSecret = process.env.SNAPTRADE_USER_SECRET;
+  if (event.httpMethod === 'OPTIONS') {
+    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
+  }
 
   try {
-    const accounts = await snapGet('/api/v1/accounts', userId, userSecret);
-    if (!accounts || accounts.length === 0) {
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades: [], message: 'No connected accounts yet. Please connect Robinhood first using the button above.' }) };
+    const snaptrade = new Snaptrade({
+      clientId: process.env.SNAPTRADE_CLIENT_ID,
+      consumerKey: process.env.SNAPTRADE_CONSUMER_KEY,
+    });
+
+    const userId = 'JOTRADES';
+    const userSecret = process.env.SNAPTRADE_USER_SECRET;
+
+    const accountsRes = await snaptrade.accountInformation.listUserAccounts({ userId, userSecret });
+    const accounts = accountsRes.data || [];
+
+    if (accounts.length === 0) {
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({ trades: [], message: 'No connected accounts. Please connect Robinhood first.' })
+      };
     }
 
     const allOrders = [];
     for (const account of accounts) {
       try {
-        const orders = await snapGet(`/api/v1/accounts/${account.id}/orders`, userId, userSecret);
-        if (Array.isArray(orders)) allOrders.push(...orders);
+        const ordersRes = await snaptrade.accountInformation.getUserAccountOrders({
+          userId, userSecret, accountId: account.id, state: 'all'
+        });
+        if (Array.isArray(ordersRes.data)) allOrders.push(...ordersRes.data);
       } catch(e) { /* skip failed account */ }
     }
 
     const trades = pairOrders(allOrders);
-    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades, totalOrders: allOrders.length }) };
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ trades, totalOrders: allOrders.length })
+    };
 
   } catch (e) {
-    return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
+    return {
+      statusCode: 500,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ error: e.message, detail: e.responseBody || '' })
+    };
   }
 };
