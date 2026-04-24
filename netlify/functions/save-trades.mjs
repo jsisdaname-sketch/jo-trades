@@ -1,19 +1,12 @@
 import { getStore } from "@netlify/blobs";
-export default async (req, context) => {
-  if (req.method !== "POST") return new Response("Method not allowed", { status: 405 });
+export const handler = async (event) => {
+  if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
   try {
-    const body = await req.json();
+    const body = JSON.parse(event.body);
     const store = getStore({ name: "jo-trades", consistency: "strong" });
     if (body.trades !== undefined) await store.setJSON("trades", body.trades);
-    return new Response(JSON.stringify({ ok: true }), {
-      status: 200,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-    });
+    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ok: true }) };
   } catch (e) {
-    return new Response(JSON.stringify({ ok: false, error: e.message }), {
-      status: 500,
-      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
-    });
+    return { statusCode: 500, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ok: false, error: e.message }) };
   }
 };
-export const config = { path: "/api/save-trades" };
