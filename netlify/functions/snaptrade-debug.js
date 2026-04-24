@@ -1,29 +1,25 @@
 const crypto = require('crypto');
 const BASE = 'https://api.snaptrade.com/api/v1';
 
-function buildRequest(path, bodyObj = null, extraQuery = '') {
+exports.handler = async () => {
   const clientId = process.env.SNAPTRADE_CLIENT_ID.trim();
   const consumerKey = encodeURI(process.env.SNAPTRADE_CONSUMER_KEY.trim());
-  const timestamp = Math.floor(Date.now() / 1000).toString();
-  const query = `clientId=${clientId}&timestamp=${timestamp}${extraQuery ? '&' + extraQuery : ''}`;
-  const sigObject = { content: bodyObj || {}, path, query };
-  const signature = crypto.createHmac('sha256', consumerKey).update(JSON.stringify(sigObject)).digest('base64');
-  return { url: `${BASE}${path}?${query}`, signature };
-}
-
-exports.handler = async () => {
   const userId = 'JOTRADES';
-  const userSecret = process.env.SNAPTRADE_USER_SECRET;
-  const extraQuery = `userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`;
+  const userSecret = process.env.SNAPTRADE_USER_SECRET.trim();
+  const timestamp = Math.floor(Date.now() / 1000).toString();
 
-  // Generate the Robinhood connection portal URL
   const path = '/api/v1/snapTrade/login';
   const bodyObj = {
     broker: 'ROBINHOOD',
     immediateRedirect: true,
     customRedirect: 'https://idyllic-druid-6826b0.netlify.app/robinhood-sync',
   };
-  const { url, signature } = buildRequest(path, bodyObj, extraQuery);
+
+  // userId and userSecret must be in query AND included in signature query string
+  const query = `clientId=${clientId}&timestamp=${timestamp}&userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`;
+  const sigObject = { content: bodyObj, path, query };
+  const signature = crypto.createHmac('sha256', consumerKey).update(JSON.stringify(sigObject)).digest('base64');
+  const url = `${BASE}${path}?${query}`;
 
   try {
     const res = await fetch(url, {
