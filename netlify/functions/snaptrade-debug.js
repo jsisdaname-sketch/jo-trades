@@ -15,25 +15,29 @@ exports.handler = async () => {
   const userId = 'JOTRADES';
   const userSecret = process.env.SNAPTRADE_USER_SECRET;
   const extraQuery = `userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`;
-  const results = {};
 
-  // Try different account endpoint variations
-  const paths = [
-    '/api/v1/accounts',
-    '/api/v1/snapTrade/listUserAccounts',
-  ];
-
-  for (const path of paths) {
-    try {
-      const { url, signature } = buildRequest(path, null, extraQuery);
-      const res = await fetch(url, { headers: { 'Signature': signature } });
-      results[path] = { status: res.status, body: await res.text() };
-    } catch(e) { results[path] = { error: e.message }; }
-  }
-
-  return {
-    statusCode: 200,
-    headers: { 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify(results, null, 2)
+  // Generate the Robinhood connection portal URL
+  const path = '/api/v1/snapTrade/login';
+  const bodyObj = {
+    broker: 'ROBINHOOD',
+    immediateRedirect: true,
+    customRedirect: 'https://idyllic-druid-6826b0.netlify.app/robinhood-sync',
   };
+  const { url, signature } = buildRequest(path, bodyObj, extraQuery);
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Signature': signature },
+      body: JSON.stringify(bodyObj),
+    });
+    const text = await res.text();
+    return {
+      statusCode: 200,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+      body: JSON.stringify({ status: res.status, response: text })
+    };
+  } catch(e) {
+    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
+  }
 };
