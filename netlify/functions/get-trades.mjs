@@ -1,7 +1,15 @@
+import { getStore } from "@netlify/blobs";
 export const handler = async (event) => {
-  return {
-    statusCode: 200,
-    headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
-    body: JSON.stringify({ siteID: process.env.NETLIFY_SITE_ID, hasToken: !!process.env.NETLIFY_AUTH_TOKEN, tokenLength: (process.env.NETLIFY_AUTH_TOKEN || '').length })
-  };
+  try {
+    const store = getStore({
+      name: "jo-trades",
+      consistency: "strong",
+      siteID: "1e22ab49-ea92-44a8-929a-bd8ce89932df",
+      token: process.env.NETLIFY_AUTH_TOKEN,
+    });
+    const trades = await store.get("trades", { type: "json" });
+    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ trades: trades || [] }) };
+  } catch (e) {
+    return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ trades: [], error: e.message }) };
+  }
 };
