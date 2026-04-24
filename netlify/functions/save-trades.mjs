@@ -6,7 +6,7 @@ export const handler = async (event) => {
     const store = getStore({
       name: "jo-trades",
       consistency: "strong",
-      siteID: process.env.NETLIFY_SITE_ID,
+      siteID: "1e22ab49-ea92-44a8-929a-bd8ce89932df",
       token: process.env.NETLIFY_AUTH_TOKEN,
     });
     if (body.trades !== undefined) await store.setJSON("trades", body.trades);
