@@ -8,21 +8,25 @@ function pairOrders(orders) {
     const action = (o.action || '').toUpperCase();
     const filledQty = parseFloat(o.filled_quantity || 0);
 
-    // Only process executed orders with actual fills
     if (status !== 'EXECUTED' || filledQty === 0) continue;
 
-    const ticker = o.universal_symbol?.symbol || o.symbol?.symbol || 'UNKNOWN';
     const isOption = !!o.option_symbol;
+
+    // Fix: get ticker from option underlying first, then fallback
+    const ticker = isOption
+      ? (o.option_symbol?.underlying_symbol?.symbol || o.universal_symbol?.symbol || 'UNKNOWN')
+      : (o.universal_symbol?.symbol || o.symbol?.symbol || 'UNKNOWN');
+
     const tradeType = isOption
       ? (o.option_symbol.option_type === 'CALL' ? 'Call' : 'Put')
       : 'Long';
+
     const key = isOption
       ? `${ticker}_${o.option_symbol.option_type}_${o.option_symbol.strike_price}_${o.option_symbol.expiry_date}`
       : `${ticker}_STOCK`;
 
     if (!groups[key]) groups[key] = { ticker, tradeType, buys: [], sells: [] };
 
-    // Robinhood uses BUY_OPEN / BUY_TO_OPEN for buys, SELL_CLOSE / SELL_TO_CLOSE for sells
     const isBuy = action.includes('BUY');
     const side = isBuy ? 'buys' : 'sells';
 
