@@ -7,12 +7,12 @@ function buildRequest(path, bodyObj = null, extraQuery = '') {
   const timestamp = Math.floor(Date.now() / 1000).toString();
   const query = `clientId=${clientId}&timestamp=${timestamp}${extraQuery ? '&' + extraQuery : ''}`;
   const sigObject = { content: bodyObj || {}, path, query };
-  const sigContent = JSON.stringify(sigObject);
-  const signature = crypto.createHmac('sha256', consumerKey).update(sigContent).digest('base64');
+  const signature = crypto.createHmac('sha256', consumerKey).update(JSON.stringify(sigObject)).digest('base64');
   return { url: `${BASE}${path}?${query}`, signature };
 }
 
-async function snapGet(path, extraQuery = '') {
+async function snapGet(path, userId, userSecret) {
+  const extraQuery = `userId=${encodeURIComponent(userId)}&userSecret=${encodeURIComponent(userSecret)}`;
   const { url, signature } = buildRequest(path, null, extraQuery);
   const res = await fetch(url, { headers: { 'Signature': signature } });
   if (!res.ok) throw new Error(`SnapTrade ${res.status}: ${await res.text()}`);
@@ -48,7 +48,13 @@ function pairOrders(orders) {
       const buy = buys[i], sell = sells[i];
       const multiplier = (tradeType === 'Call' || tradeType === 'Put') ? 100 : 1;
       const pnl = parseFloat(((sell.price - buy.price) * buy.qty * multiplier).toFixed(2));
-      trades.push({ id: `rh_${Date.now()}_${Math.random().toString(36).slice(2,7)}`, ticker, date: buy.date ? buy.date.split('T')[0] : '', type: tradeType, entry: buy.price, exit: sell.price, qty: buy.qty, pnl, outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven', source: 'Robinhood', notes: 'Auto-synced from Robinhood', synced: true });
+      trades.push({
+        id: `rh_${Date.now()}_${Math.random().toString(36).slice(2,7)}`,
+        ticker, date: buy.date ? buy.date.split('T')[0] : '',
+        type: tradeType, entry: buy.price, exit: sell.price, qty: buy.qty,
+        pnl, outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
+        source: 'Robinhood', notes: 'Auto-synced from Robinhood', synced: true,
+      });
     }
   }
   return trades;
@@ -56,20 +62,27 @@ function pairOrders(orders) {
 
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'Content-Type' }, body: '' };
-  const { userId, userSecret } = JSON.parse(event.body || '{}');
-  if (!userId || !userSecret) return { statusCode: 400, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: 'Missing credentials' }) };
+
+  const userId = 'JOTRADES';
+  const userSecret = process.env.SNAPTRADE_USER_SECRET;
 
   try {
-    const accounts = await snapGet('/accounts', `userId=${userId}&userSecret=${userSecret}`);
-    if (!accounts || accounts.length === 0) return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades: [], message: 'No connected accounts. Please connect Robinhood first.' }) };
+    const accounts = await snapGet('/api/v1/accounts', userId, userSecret);
+    if (!accounts || accounts.length === 0) {
+      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades: [], message: 'No connected accounts yet. Please connect Robinhood first using the button above.' }) };
+    }
 
     const allOrders = [];
     for (const account of accounts) {
-      const orders = await snapGet(`/accounts/${account.id}/orders`, `userId=${userId}&userSecret=${userSecret}&state=all`);
-      if (Array.isArray(orders)) allOrders.push(...orders);
+      try {
+        const orders = await snapGet(`/api/v1/accounts/${account.id}/orders`, userId, userSecret);
+        if (Array.isArray(orders)) allOrders.push(...orders);
+      } catch(e) { /* skip failed account */ }
     }
+
     const trades = pairOrders(allOrders);
     return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades, totalOrders: allOrders.length }) };
+
   } catch (e) {
     return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
   }
