@@ -3,7 +3,12 @@ export const handler = async (event) => {
   if (event.httpMethod !== "POST") return { statusCode: 405, body: "Method not allowed" };
   try {
     const body = JSON.parse(event.body);
-    const store = getStore({ name: "jo-trades", consistency: "strong" });
+    const store = getStore({
+      name: "jo-trades",
+      consistency: "strong",
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_AUTH_TOKEN,
+    });
     if (body.trades !== undefined) await store.setJSON("trades", body.trades);
     return { statusCode: 200, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }, body: JSON.stringify({ ok: true }) };
   } catch (e) {
