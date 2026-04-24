@@ -7,14 +7,14 @@
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --green: #00d084;
-    --red: #ff4d6d;
-    --gold: #fbbf24;
-    --bg: #0d0d0f;
-    --card: #141417;
-    --border: #222228;
-    --text: #e2e2e8;
-    --muted: #52525e;
+    --green: #39d98a;
+    --red: #ff5c5c;
+    --gold: #ffd166;
+    --bg: #07080a;
+    --card: #0f1117;
+    --border: #252830;
+    --text: #eef0f4;
+    --muted: #4a4f5e;
     --rh-green: #00c805;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -34,226 +34,108 @@
   h1 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 7vw, 48px); font-weight: 800; color: #fff; margin-bottom: 8px; }
   h1 span { color: var(--rh-green); }
   .subtitle { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 2px; margin-bottom: 48px; }
-
-  .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 14px;
-    padding: 28px;
-    width: 100%;
-    max-width: 520px;
-    margin-bottom: 16px;
-  }
-
-  .card-title {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 20px;
-  }
-
-  .status-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .dot {
-    width: 9px; height: 9px; border-radius: 50%;
-    background: var(--muted);
-    flex-shrink: 0;
-    transition: background .3s;
-  }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; margin-bottom: 16px; }
+  .card-title { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background .3s; }
   .dot.connected { background: var(--rh-green); box-shadow: 0 0 8px rgba(0,200,5,0.5); }
   .dot.error { background: var(--red); }
   .dot.loading { background: var(--gold); animation: pulse 1s infinite; }
   .status-text { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); }
   .status-text.connected { color: var(--rh-green); }
-
-  .btn {
-    width: 100%;
-    padding: 14px 20px;
-    border-radius: 9px;
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1px;
-    cursor: pointer;
-    transition: all .2s;
-    margin-bottom: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 10px;
-  }
+  .btn { width: 100%; padding: 14px 20px; border-radius: 9px; border: none; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn-primary { background: var(--rh-green); color: #000; }
   .btn-primary:hover:not(:disabled) { background: #00e806; box-shadow: 0 0 20px rgba(0,200,5,0.3); }
   .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
   .btn-secondary:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
-  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,77,109,0.3); font-size: 12px; padding: 10px; }
-  .btn-danger:hover:not(:disabled) { background: rgba(255,77,109,0.08); }
-
+  .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,92,92,0.3); font-size: 12px; padding: 10px; }
+  .btn-danger:hover:not(:disabled) { background: rgba(255,92,92,0.08); }
   .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
-
-  /* Preview table */
-  .preview-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 14px;
-  }
-  .preview-count {
-    font-family: 'Share Tech Mono', monospace;
-    font-size: 11px;
-    color: var(--gold);
-  }
+  .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .preview-count { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--gold); }
   .trade-list { display: flex; flex-direction: column; gap: 8px; max-height: 360px; overflow-y: auto; }
-  .trade-row {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px 14px;
-    display: grid;
-    grid-template-columns: 80px 60px 1fr 80px;
-    align-items: center;
-    gap: 8px;
-    font-size: 13px;
-  }
+  .trade-row { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; display: grid; grid-template-columns: 90px 60px 1fr 90px; align-items: center; gap: 8px; font-size: 13px; }
   .trade-ticker { font-family: 'Share Tech Mono', monospace; font-weight: bold; color: #fff; }
   .trade-type { font-family: 'Share Tech Mono', monospace; font-size: 10px; padding: 2px 6px; border-radius: 4px; text-align: center; }
-  .type-call { background: rgba(0,208,132,0.15); color: var(--green); }
-  .type-put { background: rgba(255,77,109,0.15); color: var(--red); }
-  .type-long { background: rgba(0,208,132,0.15); color: var(--green); }
-  .type-short { background: rgba(255,77,109,0.15); color: var(--red); }
+  .type-call { background: rgba(57,217,138,0.15); color: var(--green); }
+  .type-put { background: rgba(255,92,92,0.15); color: var(--red); }
+  .type-long { background: rgba(57,217,138,0.15); color: var(--green); }
   .trade-date { font-family: 'Share Tech Mono', monospace; font-size: 11px; color: var(--muted); }
   .trade-pnl { font-family: 'Share Tech Mono', monospace; font-size: 13px; font-weight: bold; text-align: right; }
   .pnl-win { color: var(--green); }
   .pnl-loss { color: var(--red); }
   .pnl-be { color: var(--muted); }
-
-  .summary-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .summary-item {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    text-align: center;
-  }
+  .summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .summary-item { background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px; padding: 12px; text-align: center; }
   .summary-val { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; }
   .summary-label { font-family: 'Share Tech Mono', monospace; font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
-
-  .alert {
-    background: rgba(251,191,36,0.08);
-    border: 1px solid rgba(251,191,36,0.25);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 13px;
-    color: var(--gold);
-    margin-bottom: 10px;
-    display: none;
-  }
+  .alert { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.25); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: var(--gold); margin-bottom: 10px; display: none; }
   .alert.show { display: block; }
-  .alert.error { background: rgba(255,77,109,0.08); border-color: rgba(255,77,109,0.25); color: var(--red); }
-  .alert.success { background: rgba(0,208,132,0.08); border-color: rgba(0,208,132,0.25); color: var(--green); }
-
+  .alert.error { background: rgba(255,92,92,0.08); border-color: rgba(255,92,92,0.25); color: var(--red); }
+  .alert.success { background: rgba(57,217,138,0.08); border-color: rgba(57,217,138,0.25); color: var(--green); }
   #preview-section, #import-section { display: none; }
-
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:none} }
-  .card { animation: fadeIn .4s ease both; }
 </style>
 </head>
 <body>
 
 <a href="/trades" class="back">← Back to Journal</a>
-
 <div class="logo">JO Trades</div>
 <h1>Sync <span>Robinhood</span></h1>
 <div class="subtitle">CONNECT ONCE · AUTO-IMPORT TRADES · STAY IN SYNC</div>
 
-<!-- STEP 1: Connection Card -->
 <div class="card" id="connect-card">
   <div class="card-title">Step 1 — Robinhood Connection</div>
-
   <div class="status-row">
     <div class="dot" id="status-dot"></div>
     <span class="status-text" id="status-text">Not connected</span>
   </div>
-
   <div class="alert" id="main-alert"></div>
-
-  <button class="btn btn-primary" id="btn-connect" onclick="connectRobinhood()">
-    🔗 Connect Robinhood Account
-  </button>
-
-  <button class="btn btn-secondary" id="btn-fetch" onclick="fetchTrades()" style="display:none">
-    ↓ Fetch Latest Trades
-  </button>
-
+  <button class="btn btn-primary" id="btn-connect" onclick="connectRobinhood()">🔗 Connect Robinhood Account</button>
+  <button class="btn btn-secondary" id="btn-fetch" onclick="fetchTrades()" style="display:none">↓ Fetch Latest Trades</button>
   <hr class="divider" id="divider-reset" style="display:none">
-
-  <button class="btn btn-danger" id="btn-reset" onclick="resetConnection()" style="display:none">
-    Disconnect &amp; Reset
-  </button>
+  <button class="btn btn-danger" id="btn-reset" onclick="resetConnection()" style="display:none">Disconnect &amp; Reset</button>
 </div>
 
-<!-- STEP 2: Preview Card -->
 <div class="card" id="preview-section">
   <div class="card-title">Step 2 — Preview Trades</div>
-
   <div class="summary-grid">
-    <div class="summary-item">
-      <div class="summary-val" id="sum-total">0</div>
-      <div class="summary-label">TOTAL TRADES</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-val" style="color:var(--green)" id="sum-wins">0</div>
-      <div class="summary-label">WINS</div>
-    </div>
-    <div class="summary-item">
-      <div class="summary-val" id="sum-pnl">$0</div>
-      <div class="summary-label">NET P&L</div>
-    </div>
+    <div class="summary-item"><div class="summary-val" id="sum-total">0</div><div class="summary-label">TOTAL TRADES</div></div>
+    <div class="summary-item"><div class="summary-val" style="color:var(--green)" id="sum-wins">0</div><div class="summary-label">WINS</div></div>
+    <div class="summary-item"><div class="summary-val" id="sum-pnl">$0</div><div class="summary-label">NET P&L</div></div>
   </div>
-
   <div class="preview-header">
     <span style="font-size:13px;color:var(--muted)">Matched completed trades</span>
     <span class="preview-count" id="preview-count"></span>
   </div>
-
   <div class="trade-list" id="trade-list"></div>
 </div>
 
-<!-- STEP 3: Import Card -->
 <div class="card" id="import-section">
   <div class="card-title">Step 3 — Import to Journal</div>
-  <div class="alert show" id="import-note">
-    ⚠️ Duplicate check: trades already marked as synced will be skipped automatically.
-  </div>
-  <button class="btn btn-primary" onclick="importTrades()">
-    ✓ Import All Trades to Journal
-  </button>
+  <div class="alert show" id="import-note">⚠️ Duplicate check: trades already synced will be skipped automatically.</div>
+  <button class="btn btn-primary" onclick="importTrades()">✓ Import All Trades to Journal</button>
 </div>
 
 <script>
+  // MUST match the storage key in trades.html exactly
+  const JOURNAL_KEY = 'jo_trades_v1';
   const FUNCTIONS = '/.netlify/functions';
   let fetchedTrades = [];
 
-  // ─── Startup: check if already connected ───────────────────────────
   window.addEventListener('DOMContentLoaded', () => {
-    const userId = localStorage.getItem('snaptrade_userId');
-    const userSecret = localStorage.getItem('snaptrade_userSecret');
-    if (userId && userSecret) setConnected();
+    // Check if already connected (user secret exists on server)
+    checkConnection();
   });
+
+  async function checkConnection() {
+    try {
+      const res = await fetch(`${FUNCTIONS}/snaptrade-register`, { method: 'POST' });
+      const data = await res.json();
+      if (res.ok && data.userSecret) setConnected();
+    } catch(e) {}
+  }
 
   function setConnected() {
     document.getElementById('status-dot').className = 'dot connected';
@@ -268,7 +150,6 @@
   function setLoading(msg) {
     document.getElementById('status-dot').className = 'dot loading';
     document.getElementById('status-text').textContent = msg;
-    document.getElementById('status-text').className = 'status-text';
   }
 
   function showAlert(msg, type = 'warning') {
@@ -277,55 +158,18 @@
     el.className = `alert show ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`;
   }
 
-  // ─── Step 1: Register + Connect ────────────────────────────────────
   async function connectRobinhood() {
     document.getElementById('btn-connect').disabled = true;
-    setLoading('Registering with SnapTrade…');
+    setLoading('Opening Robinhood authorization…');
 
     try {
-      // Register user
-      const regRes = await fetch(`${FUNCTIONS}/snaptrade-register`, { method: 'POST' });
-      const regData = await regRes.json();
-
-      let userId, userSecret;
-
-      if (regRes.ok) {
-        userId = regData.userId;
-        userSecret = regData.userSecret;
-        localStorage.setItem('snaptrade_userId', userId);
-        localStorage.setItem('snaptrade_userSecret', userSecret);
-      } else if (regRes.status === 409) {
-        // Already registered — use stored secret
-        userId = localStorage.getItem('snaptrade_userId') || 'jo-trades-user';
-        userSecret = localStorage.getItem('snaptrade_userSecret');
-        if (!userSecret) {
-          showAlert('Account exists but userSecret missing. Click Reset below and try again.', 'error');
-          document.getElementById('btn-connect').disabled = false;
-          document.getElementById('status-dot').className = 'dot error';
-          document.getElementById('status-text').textContent = 'Registration error';
-          return;
-        }
-      } else {
-        throw new Error(regData.error || 'Registration failed');
-      }
-
-      // Get connection portal URL
-      setLoading('Opening Robinhood authorization…');
-      const linkRes = await fetch(`${FUNCTIONS}/snaptrade-link`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, userSecret }),
-      });
+      const linkRes = await fetch(`${FUNCTIONS}/snaptrade-link`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       const linkData = await linkRes.json();
+      if (!linkRes.ok || !linkData.redirectURI) throw new Error(linkData.error || 'Failed to get connection link');
 
-      if (!linkRes.ok) throw new Error(linkData.error || 'Failed to get connection link');
-
-      // Open Robinhood OAuth portal
       const popup = window.open(linkData.redirectURI, 'robinhood_auth', 'width=480,height=700,left=200,top=100');
-
       showAlert('A Robinhood login window just opened. Log in, authorize access, then come back here and click "Fetch Latest Trades".', 'warning');
 
-      // Poll for popup close
       const timer = setInterval(() => {
         if (popup && popup.closed) {
           clearInterval(timer);
@@ -342,22 +186,13 @@
     }
   }
 
-  // ─── Step 2: Fetch Trades ──────────────────────────────────────────
   async function fetchTrades() {
-    const userId = localStorage.getItem('snaptrade_userId');
-    const userSecret = localStorage.getItem('snaptrade_userSecret');
-
     document.getElementById('btn-fetch').disabled = true;
     setLoading('Fetching trades from Robinhood…');
 
     try {
-      const res = await fetch(`${FUNCTIONS}/snaptrade-sync`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, userSecret }),
-      });
+      const res = await fetch(`${FUNCTIONS}/snaptrade-sync`, { method: 'POST', headers: { 'Content-Type': 'application/json' } });
       const data = await res.json();
-
       if (!res.ok) throw new Error(data.error || 'Sync failed');
 
       fetchedTrades = data.trades || [];
@@ -366,9 +201,8 @@
       document.getElementById('btn-fetch').disabled = false;
 
       if (fetchedTrades.length === 0) {
-        showAlert(data.message || 'No completed trades found yet. If you just connected, try syncing again in a few minutes.', 'warning');
+        showAlert(data.message || 'No completed trades found yet. Try again in a few minutes.', 'warning');
       }
-
     } catch (e) {
       showAlert(`Sync error: ${e.message}`, 'error');
       document.getElementById('status-dot').className = 'dot error';
@@ -377,8 +211,7 @@
   }
 
   function renderPreview(trades) {
-    if (trades.length === 0) return;
-
+    if (!trades.length) return;
     document.getElementById('preview-section').style.display = 'block';
     document.getElementById('import-section').style.display = 'block';
 
@@ -404,30 +237,52 @@
     `).join('');
   }
 
-  // ─── Step 3: Import to Journal ─────────────────────────────────────
   function importTrades() {
-    const existing = JSON.parse(localStorage.getItem('jo_trades') || '[]');
+    // Read existing trades from the CORRECT key
+    let existing = [];
+    try { existing = JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]'); } catch(e) {}
+
     const existingIds = new Set(existing.map(t => t.id));
 
-    const newTrades = fetchedTrades.filter(t => !existingIds.has(t.id));
-    const merged = [...existing, ...newTrades];
+    // Map Robinhood trades to journal format
+    const newTrades = fetchedTrades
+      .filter(t => !existingIds.has(t.id))
+      .map(t => ({
+        id: t.id,
+        ticker: t.ticker,
+        date: t.date,
+        type: t.type,
+        entry: t.entry,
+        exit: t.exit,
+        size: t.qty,
+        pnl: t.pnl,
+        // Map outcome to journal format (Win/Loss/BE not win/loss/breakeven)
+        outcome: t.outcome === 'win' ? 'Win' : t.outcome === 'loss' ? 'Loss' : 'BE',
+        source: 'Robinhood',
+        notes: 'Auto-synced from Robinhood',
+        synced: true,
+      }));
 
-    localStorage.setItem('jo_trades', JSON.stringify(merged));
+    const merged = [...existing, ...newTrades];
+    localStorage.setItem(JOURNAL_KEY, JSON.stringify(merged));
+
+    // Also push to cloud
+    fetch('/api/save-trades', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trades: merged })
+    }).catch(() => {});
 
     const note = document.getElementById('import-note');
     note.textContent = `✓ ${newTrades.length} new trades imported! ${fetchedTrades.length - newTrades.length} duplicates skipped. Redirecting to journal…`;
     note.className = 'alert show success';
-
     document.querySelector('#import-section .btn').disabled = true;
 
     setTimeout(() => { window.location.href = '/trades'; }, 2000);
   }
 
-  // ─── Reset ─────────────────────────────────────────────────────────
   function resetConnection() {
-    if (!confirm('Disconnect Robinhood? Your existing journal trades will NOT be deleted.')) return;
-    localStorage.removeItem('snaptrade_userId');
-    localStorage.removeItem('snaptrade_userSecret');
+    if (!confirm('This will disconnect Robinhood. Your journal trades will NOT be deleted.')) return;
     location.reload();
   }
 </script>
