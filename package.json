@@ -1,5 +1,7 @@
 {
+  "name": "jo-trades",
+  "version": "1.0.0",
   "dependencies": {
-    "@netlify/blobs": "^10.7.4"
+    "snaptrade-typescript-sdk": "latest"
   }
 }
