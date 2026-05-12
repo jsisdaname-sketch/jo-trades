@@ -294,6 +294,15 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .empty-i{font-size:32px;margin-bottom:12px;}
 .empty-sub{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6;}
 
+/* ── LEGS ── */
+.leg-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;position:relative;}
+.leg-row input{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;width:100%;transition:border-color .2s;}
+.leg-row input:focus{border-color:var(--teal);}
+.leg-label{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:3px;}
+.leg-del{background:none;border:none;color:var(--muted);font-size:14px;cursor:pointer;padding:4px;line-height:1;transition:color .15s;flex-shrink:0;}
+.leg-del:hover{color:var(--red);}
+.leg-num{font-family:var(--mono);font-size:9px;color:var(--teal);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+
 /* ── ANALYTICS ── */
 .analytics-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
 </style>
@@ -458,15 +467,32 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="field"><label>Ticker</label><input type="text" id="tickerInp" placeholder="META, HOOD, NKE…" style="text-transform:uppercase"/></div>
       <div class="field"><label>Date</label><input type="date" id="dateInp"/></div>
     </div>
-    <div class="row3">
-      <div class="field"><label>Type</label><select id="typeInp"><option>Call</option><option>Put</option><option>Long</option><option>Short</option><option>Other</option></select></div>
-      <div class="field"><label>Entry $</label><input type="number" id="entryInp" placeholder="0.00" step="0.01" inputmode="decimal"/></div>
-      <div class="field"><label>Exit $</label><input type="number" id="exitInp" placeholder="0.00" step="0.01" inputmode="decimal"/></div>
-    </div>
     <div class="row2">
-      <div class="field"><label>Contracts / Shares</label><input type="number" id="sizeInp" placeholder="1" step="1" inputmode="decimal"/></div>
-      <div class="field"><label>P&amp;L ($) — override</label><input type="number" id="pnlInp" placeholder="auto-calc" step="0.01" inputmode="decimal"/></div>
+      <div class="field"><label>Type</label><select id="typeInp"><option>Call</option><option>Put</option><option>Long</option><option>Short</option><option>Other</option></select></div>
+      <div class="field"><label>Exit Price $</label><input type="number" id="exitInp" placeholder="0.00" step="0.01" inputmode="decimal" oninput="recalcLegs()"/></div>
     </div>
+
+    <!-- MULTI-LEG ENTRIES -->
+    <div class="field">
+      <label>Entry Legs <span style="color:var(--muted2);font-size:8px;letter-spacing:0">(add each buy separately)</span></label>
+      <div id="legsContainer"></div>
+      <button type="button" onclick="addLeg()" style="width:100%;margin-top:6px;padding:9px;border-radius:8px;border:1px dashed var(--border);background:transparent;color:var(--teal);font-family:var(--mono);font-size:11px;cursor:pointer;letter-spacing:.5px;transition:all .2s;" onmouseover="this.style.borderColor='var(--teal)'" onmouseout="this.style.borderColor='var(--border)'">
+        + Add Leg
+      </button>
+      <div id="legsSummary" style="display:none;margin-top:10px;padding:10px 12px;border-radius:8px;background:var(--s3);border:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-bottom:4px">
+          <span style="color:var(--muted)">Avg Entry</span><span id="legAvgEntry" style="color:var(--blue)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:11px;margin-bottom:4px">
+          <span style="color:var(--muted)">Total Contracts</span><span id="legTotalSize" style="color:var(--text)">—</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-family:var(--mono);font-size:13px;font-weight:700">
+          <span style="color:var(--muted)">Est. P&L</span><span id="legEstPnl">—</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="field"><label>P&amp;L ($) — manual override</label><input type="number" id="pnlInp" placeholder="leave blank to auto-calc from legs" step="0.01" inputmode="decimal"/></div>
 
     <!-- Outcome -->
     <div class="field">
@@ -1059,9 +1085,10 @@ function openDetail(id){
     <div class="drow"><span class="dk">P&amp;L</span><span class="dv" style="color:${t.pnl>0?'var(--green)':t.pnl<0?'var(--red)':'var(--yellow)'}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(2)}</span></div>
     <div class="drow"><span class="dk">Outcome</span><span class="dv">${t.outcome==='Win'?'🟢 Win':t.outcome==='Loss'?'🔴 Loss':'🟡 Break Even'}</span></div>
     <div class="drow"><span class="dk">Source</span><span class="dv"><span class="src-badge ${srcClass}">${t.source}</span></span></div>
-    ${t.entry?`<div class="drow"><span class="dk">Entry</span><span class="dv">$${t.entry}</span></div>`:''}
+    ${t.entry?`<div class="drow"><span class="dk">Avg Entry</span><span class="dv" style="color:var(--blue)">$${parseFloat(t.entry).toFixed(2)}</span></div>`:''}
+    ${t.legs && t.legs.length>1 ? `<div class="drow" style="flex-direction:column;align-items:flex-start;gap:6px"><span class="dk" style="margin-bottom:2px">Legs (${t.legs.length})</span>${t.legs.map((l,i)=>`<span style="font-family:var(--mono);font-size:11px;color:var(--text)">Leg ${i+1}: <strong>$${parseFloat(l.price||0).toFixed(2)}</strong> × ${l.size||1} contract${(l.size||1)!==1?'s':''}</span>`).join('')}</div>`:'' }
     ${t.exit?`<div class="drow"><span class="dk">Exit</span><span class="dv">$${t.exit}</span></div>`:''}
-    ${t.size?`<div class="drow"><span class="dk">Size</span><span class="dv">${t.size} units</span></div>`:''}
+    ${t.size?`<div class="drow"><span class="dk">Total Contracts</span><span class="dv">${t.size}</span></div>`:''}
     ${t.pattern?`<div class="drow"><span class="dk">Pattern</span><span class="dv" style="color:var(--teal)">${t.pattern}</span></div>`:''}
     ${t.candle?`<div class="drow"><span class="dk">Entry Candle</span><span class="dv" style="color:var(--purple)">${t.candle}</span></div>`:''}
     ${t.mood?`<div class="drow"><span class="dk">Mood</span><span class="dv">${t.mood}</span></div>`:''}`;
@@ -1100,6 +1127,9 @@ function editFromDetail(){
   setSrcByName(t.source);
   selMood = t.mood||'😤';
   document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===selMood));
+  // Restore legs
+  legs = t.legs && t.legs.length ? [...t.legs] : [{price:t.entry||0, size:t.size||1}];
+  renderLegs();
   if(t.chartImage){
     chartImgData = t.chartImage;
     document.getElementById('chartPreview').src = t.chartImage;
@@ -1115,14 +1145,76 @@ function delTrade(id){
   saveAll(getData().filter(r=>r.id!==id)); renderAll();
 }
 
+/* ─── MULTI-LEG LOGIC ─── */
+let legs = []; // [{price, size}]
+
+function addLeg(price='', size=''){
+  legs.push({price, size});
+  renderLegs();
+}
+
+function removeLeg(i){
+  legs.splice(i,1);
+  renderLegs();
+}
+
+function renderLegs(){
+  const container = document.getElementById('legsContainer');
+  container.innerHTML = legs.map((leg,i)=>`
+    <div class="leg-row">
+      <div>
+        <div class="leg-num">Leg ${i+1}</div>
+        <div class="leg-label">Entry Price $</div>
+        <input type="number" placeholder="0.00" step="0.01" inputmode="decimal"
+          value="${leg.price||''}"
+          oninput="legs[${i}].price=parseFloat(this.value)||0;recalcLegs()"/>
+      </div>
+      <div>
+        <div class="leg-num">&nbsp;</div>
+        <div class="leg-label">Contracts</div>
+        <input type="number" placeholder="1" step="1" inputmode="decimal"
+          value="${leg.size||''}"
+          oninput="legs[${i}].size=parseFloat(this.value)||0;recalcLegs()"/>
+      </div>
+      <button class="leg-del" onclick="removeLeg(${i})" title="Remove leg">✕</button>
+    </div>`).join('');
+  recalcLegs();
+}
+
+function recalcLegs(){
+  const summary = document.getElementById('legsSummary');
+  if(legs.length === 0){ summary.style.display='none'; return; }
+  summary.style.display='block';
+  const totalContracts = legs.reduce((s,l)=>s+(l.size||0),0);
+  const weightedSum = legs.reduce((s,l)=>s+((l.price||0)*(l.size||0)),0);
+  const avgEntry = totalContracts>0 ? weightedSum/totalContracts : 0;
+  const exitPrice = parseFloat(document.getElementById('exitInp').value)||0;
+  const type = document.getElementById('typeInp').value;
+  let estPnl = 0;
+  if(exitPrice && avgEntry){
+    estPnl = (type==='Put'||type==='Short')
+      ? (avgEntry-exitPrice)*totalContracts*100
+      : (exitPrice-avgEntry)*totalContracts*100;
+  }
+  document.getElementById('legAvgEntry').textContent = avgEntry>0?'$'+avgEntry.toFixed(2):'—';
+  document.getElementById('legTotalSize').textContent = totalContracts>0?totalContracts+'x':'—';
+  const pnlEl = document.getElementById('legEstPnl');
+  if(exitPrice && avgEntry && totalContracts){
+    pnlEl.textContent = (estPnl>=0?'+':'')+'$'+estPnl.toFixed(2);
+    pnlEl.style.color = estPnl>=0?'var(--green)':'var(--red)';
+  } else {
+    pnlEl.textContent='—'; pnlEl.style.color='var(--muted2)';
+  }
+}
+
 /* ─── ADD / EDIT MODAL ─── */
 function openAdd(){
-  editingId = null; chartImgData = null;
+  editingId = null; chartImgData = null; legs = [];
   document.getElementById('addModalTitle').textContent = '📝 Log Trade';
   document.getElementById('addModal').classList.add('open');
   document.getElementById('dateInp').value = new Date().toISOString().split('T')[0];
   setOutcome('Win'); setSrcByName('Fakes Trade');
-  ['tickerInp','entryInp','exitInp','sizeInp','pnlInp','notesInp','whyInp','lessonInp'].forEach(id=>document.getElementById(id).value='');
+  ['exitInp','pnlInp','notesInp','whyInp','lessonInp'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('patternInp').value='';
   document.getElementById('candleInp').value='';
   document.getElementById('typeInp').value='Call';
@@ -1134,6 +1226,7 @@ function openAdd(){
   document.getElementById('aiScanResult').innerHTML='';
   selMood='😤';
   document.querySelectorAll('.mood-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  addLeg(); // start with one leg by default
 }
 function closeAdd(){ document.getElementById('addModal').classList.remove('open'); }
 
@@ -1190,9 +1283,7 @@ function saveTrade(){
   const ticker = (document.getElementById('tickerInp').value||'').trim().toUpperCase();
   const date = document.getElementById('dateInp').value;
   const type = document.getElementById('typeInp').value;
-  const entry = parseFloat(document.getElementById('entryInp').value)||0;
   const exit = parseFloat(document.getElementById('exitInp').value)||0;
-  const size = parseFloat(document.getElementById('sizeInp').value)||1;
   const notes = document.getElementById('notesInp').value.trim();
   const why = document.getElementById('whyInp').value.trim();
   const lesson = document.getElementById('lessonInp').value.trim();
@@ -1200,18 +1291,36 @@ function saveTrade(){
   const candle = document.getElementById('candleInp').value;
   if(!ticker){alert('Enter a ticker.');return;}
   if(!date){alert('Pick a date.');return;}
+  if(legs.length===0){alert('Add at least one entry leg.');return;}
+
+  // Calculate from legs
+  const validLegs = legs.filter(l=>l.price>0);
+  const totalContracts = validLegs.reduce((s,l)=>s+(l.size||1),0);
+  const weightedSum = validLegs.reduce((s,l)=>s+(l.price*(l.size||1)),0);
+  const avgEntry = totalContracts>0?weightedSum/totalContracts:0;
+
   let pnl = parseFloat(document.getElementById('pnlInp').value);
   if(isNaN(pnl)){
-    if(entry&&exit&&size) pnl=(type==='Put'||type==='Short')?(entry-exit)*size*100:(exit-entry)*size*100;
+    if(avgEntry&&exit&&totalContracts)
+      pnl=(type==='Put'||type==='Short')?(avgEntry-exit)*totalContracts*100:(exit-avgEntry)*totalContracts*100;
     else pnl=0;
   }
   let outcome=selOutcome;
-  if(!document.getElementById('pnlInp').value&&entry&&exit){
+  if(!document.getElementById('pnlInp').value&&avgEntry&&exit){
     outcome=pnl>0?'Win':pnl<0?'Loss':'BE'; setOutcome(outcome);
   }
   const d=getData();
-  const stored_ai = editingId ? (d.find(r=>r.id===editingId)||{}).aiAnalysis : null;
-  const record={id:editingId||Date.now().toString(),ticker,date,type,entry,exit,size,pnl,outcome,source:selSrc,notes,why,lesson,pattern,candle,mood:selMood,chartImage:chartImgData||null,aiAnalysis:stored_ai||null};
+  const stored_ai = editingId?(d.find(r=>r.id===editingId)||{}).aiAnalysis:null;
+  const record={
+    id:editingId||Date.now().toString(),
+    ticker,date,type,
+    entry:avgEntry,  // avg entry for display
+    exit,
+    size:totalContracts,
+    legs:[...validLegs], // store all legs
+    pnl,outcome,source:selSrc,notes,why,lesson,pattern,candle,
+    mood:selMood,chartImage:chartImgData||null,aiAnalysis:stored_ai||null
+  };
   if(editingId){
     const idx=d.findIndex(r=>r.id===editingId);
     if(idx>=0) d[idx]={...d[idx],...record};
