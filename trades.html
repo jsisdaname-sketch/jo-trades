@@ -303,6 +303,57 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .empty-i{font-size:32px;margin-bottom:12px;}
 .empty-sub{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.6;}
 
+/* ── ANNOTATION TOOL ── */
+.annotate-canvas-wrap{position:relative;width:100%;overflow:hidden;border-radius:10px;background:var(--s3);border:1px solid var(--border);}
+.annotate-canvas{display:block;width:100%;cursor:crosshair;touch-action:none;}
+.annotate-toolbar{display:flex;gap:6px;padding:8px 0 6px;flex-wrap:wrap;align-items:center;}
+.annotate-tool{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--s2);font-family:var(--mono);font-size:10px;cursor:pointer;color:var(--muted2);transition:all .15s;letter-spacing:.3px;white-space:nowrap;user-select:none;}
+.annotate-tool.active{border-color:currentColor;}
+.annotate-tool.entry-tool{color:var(--green);}
+.annotate-tool.entry-tool.active{background:rgba(95,207,138,.15);}
+.annotate-tool.exit-tool{color:var(--red);}
+.annotate-tool.exit-tool.active{background:rgba(255,110,110,.15);}
+.annotate-tool.level-tool{color:var(--blue);}
+.annotate-tool.level-tool.active{background:rgba(106,169,255,.15);}
+.annotate-instruction{font-family:var(--mono);font-size:9px;color:var(--muted2);text-align:center;padding:3px 0 5px;letter-spacing:.5px;text-transform:uppercase;}
+
+/* ── TRADE TEMPLATE ── */
+.trade-template{border-radius:14px;overflow:hidden;background:var(--s1);border:1px solid var(--border);}
+.tt-header{padding:14px 16px;display:flex;align-items:center;justify-content:space-between;}
+.tt-ticker-block{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.tt-ticker{font-family:var(--head);font-size:22px;font-weight:800;}
+.tt-badge{font-family:var(--mono);font-size:9px;padding:4px 10px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;}
+.tt-badge.win{background:rgba(95,207,138,.2);color:var(--green);border:1px solid rgba(95,207,138,.4);}
+.tt-badge.loss{background:rgba(255,110,110,.2);color:var(--red);border:1px solid rgba(255,110,110,.3);}
+.tt-badge.be{background:rgba(255,209,102,.2);color:var(--yellow);border:1px solid rgba(255,209,102,.3);}
+.tt-pnl{font-family:var(--mono);font-size:20px;font-weight:700;}
+.tt-chart-area{position:relative;width:100%;}
+.tt-chart-area img{width:100%;display:block;max-height:300px;object-fit:contain;background:var(--s3);}
+.tt-no-chart{height:160px;display:flex;flex-direction:column;align-items:center;justify-content:center;color:var(--muted);font-size:32px;gap:8px;background:var(--s2);}
+.tt-stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--border);}
+.tt-stat{background:var(--s2);padding:12px;text-align:center;}
+.tt-stat-val{font-family:var(--mono);font-size:14px;font-weight:700;margin-bottom:2px;}
+.tt-stat-lbl{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);}
+.tt-section{padding:12px 16px;border-top:1px solid var(--border);}
+.tt-section-label{font-family:var(--mono);font-size:8px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-bottom:6px;}
+.tt-section-text{font-size:13px;line-height:1.7;color:var(--muted2);font-style:italic;}
+.tt-tags{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px;}
+.tt-tag{font-family:var(--mono);font-size:8px;padding:3px 8px;border-radius:3px;border:1px solid var(--border);background:var(--s3);color:var(--muted2);}
+.tt-action-row{display:flex;gap:8px;padding:12px 16px 16px;flex-wrap:wrap;}
+.tt-action-row .save-btn{margin-top:0;flex:1;min-width:120px;}
+
+/* ── GALLERY CARD ENHANCEMENTS ── */
+.chart-card-actions{position:absolute;top:7px;right:7px;display:flex;gap:5px;opacity:0;transition:opacity .2s;z-index:2;}
+.chart-card:hover .chart-card-actions,.chart-card:focus-within .chart-card-actions{opacity:1;}
+.cc-action-btn{width:30px;height:30px;border-radius:50%;background:rgba(13,10,8,.8);border:1px solid rgba(255,255,255,.18);color:var(--text);font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;backdrop-filter:blur(6px);}
+.cc-action-btn:hover{background:rgba(255,255,255,.18);transform:scale(1.1);}
+.cc-badge-annotated{position:absolute;top:7px;left:7px;background:rgba(95,207,138,.85);color:#000;font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;letter-spacing:.5px;z-index:2;pointer-events:none;}
+/* On mobile always show action buttons */
+@media(max-width:600px){.chart-card-actions{opacity:1;}}
+
+/* ── GALLERY TIP BANNER ── */
+.gallery-tip{background:rgba(106,169,255,.07);border:1px solid rgba(106,169,255,.2);border-radius:10px;padding:10px 14px;margin-bottom:12px;font-family:var(--mono);font-size:10px;color:var(--blue);line-height:1.7;letter-spacing:.3px;}
+
 /* ── LEGS ── */
 .leg-row{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;align-items:center;margin-bottom:8px;padding:10px 12px;background:var(--s2);border:1px solid var(--border);border-radius:8px;position:relative;}
 .leg-row input{background:var(--s3);border:1px solid var(--border);border-radius:6px;padding:8px 10px;font-family:var(--mono);font-size:13px;color:var(--text);outline:none;width:100%;transition:border-color .2s;}
@@ -613,7 +664,14 @@ body{
 
   <!-- GALLERY -->
   <div class="view" id="tab-gallery">
-    <div class="sec">Chart Gallery — Click any chart to view details</div>
+    <div class="gallery-tip">💡 <strong>TradingView Tip:</strong> For the best visual setup, take your screenshot right at your entry — show at least 2 candles before and after. Then tap <strong>📍</strong> on any chart to drop Entry ↑ and Exit ↓ arrows exactly where you traded.</div>
+    <div class="filter-row" id="galleryFilterRow">
+      <div class="filter-pill active" onclick="setGalleryFilter('All')">All</div>
+      <div class="filter-pill" onclick="setGalleryFilter('Win')">Wins ✅</div>
+      <div class="filter-pill" onclick="setGalleryFilter('Loss')">Losses ❌</div>
+      <div class="filter-pill" onclick="setGalleryFilter('annotated')">Annotated 📍</div>
+    </div>
+    <div class="sec">Chart Gallery — tap 📍 to annotate · 📋 for trade template</div>
     <div class="gallery-grid" id="galleryGrid"></div>
   </div>
 
@@ -677,6 +735,10 @@ body{
     <div class="row2">
       <div class="field"><label>Type</label><select id="typeInp"><option>Call</option><option>Put</option><option>Long</option><option>Short</option><option>Other</option></select></div>
       <div class="field"><label>Exit Price $</label><input type="number" id="exitInp" placeholder="0.00" step="0.01" inputmode="decimal" oninput="recalcLegs()"/></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Exit Time ⏱ (optional)</label><input type="time" id="exitTimeInp" placeholder="—"/></div>
+      <div class="field" style="display:flex;flex-direction:column;justify-content:flex-end"><label style="opacity:0">spacer</label><div style="font-family:var(--mono);font-size:9px;color:var(--muted2);padding:6px 0;line-height:1.6">Set the time you sold / closed the position</div></div>
     </div>
 
     <!-- MULTI-LEG ENTRIES -->
@@ -851,6 +913,43 @@ body{
       <button class="mclose" onclick="closeDayModal()">✕</button>
     </div>
     <div id="dayModalContent"></div>
+  </div>
+</div>
+
+<!-- ANNOTATE MODAL -->
+<div class="overlay" id="annotateModal">
+  <div class="modal" style="padding-bottom:30px">
+    <div class="mhead">
+      <div class="mtitle">📍 Annotate Chart</div>
+      <button class="mclose" onclick="closeAnnotate()">✕</button>
+    </div>
+    <div class="annotate-instruction" id="annotateInstruction">TAP ON CHART TO PLACE ENTRY ARROW</div>
+    <div class="annotate-toolbar">
+      <div class="annotate-tool entry-tool active" id="tool-entry" onclick="setAnnotateTool('entry')">↑ Entry</div>
+      <div class="annotate-tool exit-tool" id="tool-exit" onclick="setAnnotateTool('exit')">↓ Exit</div>
+      <div class="annotate-tool level-tool" id="tool-level" onclick="setAnnotateTool('level')">— Price Level</div>
+      <div class="annotate-tool" onclick="undoAnnotation()" style="color:var(--muted2);margin-left:auto">↩ Undo</div>
+      <div class="annotate-tool" onclick="clearAnnotations()" style="color:var(--red)">🗑 Clear</div>
+    </div>
+    <div class="annotate-canvas-wrap">
+      <canvas id="annotateCanvas" class="annotate-canvas"></canvas>
+    </div>
+    <div style="margin-top:8px;font-family:var(--mono);font-size:9px;color:var(--muted2);text-align:center;line-height:1.6">Green ↑ = Entry where you bought · Red ↓ = Exit where you sold<br>Blue — = Key price level (support/resistance)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px">
+      <button class="save-btn" style="background:var(--s3);color:var(--text);border:1px solid var(--border)" onclick="closeAnnotate()">Cancel</button>
+      <button class="save-btn" onclick="saveAnnotations()">💾 Save Annotations</button>
+    </div>
+  </div>
+</div>
+
+<!-- TEMPLATE MODAL -->
+<div class="overlay" id="templateModal">
+  <div class="modal" style="padding:0 0 30px">
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:16px 16px 0">
+      <div style="font-family:var(--head);font-size:16px;font-weight:800">📋 Trade Template</div>
+      <button class="mclose" onclick="closeTemplate()">✕</button>
+    </div>
+    <div id="templateContent" style="padding:12px 16px 0"></div>
   </div>
 </div>
 
@@ -1300,28 +1399,51 @@ function renderGallery(data){
     document.getElementById('galleryGrid').innerHTML='<div class="empty" style="grid-column:1/-1"><div class="empty-i">🖼</div>No chart screenshots yet.<div class="empty-sub">When you log a trade and upload a chart screenshot,<br>it will appear here as your trade collage.</div></div>';
     return;
   }
-  document.getElementById('galleryGrid').innerHTML = sorted.map(t=>{
+  // Apply gallery filter
+  let filtered = sorted;
+  if(galleryFilter==='Win') filtered = sorted.filter(t=>t.outcome==='Win');
+  else if(galleryFilter==='Loss') filtered = sorted.filter(t=>t.outcome==='Loss');
+  else if(galleryFilter==='annotated') filtered = sorted.filter(t=>t.annotations&&t.annotations.length);
+
+  if(!filtered.length){
+    document.getElementById('galleryGrid').innerHTML=`<div class="empty" style="grid-column:1/-1"><div class="empty-i">🖼</div>No charts match this filter.<div class="empty-sub">Try a different filter or log trades with chart screenshots.</div></div>`;
+    return;
+  }
+
+  document.getElementById('galleryGrid').innerHTML = filtered.map(t=>{
     const srcClass = SRC_CLASSES[t.source]||'';
     const pnlColor = t.pnl>0?'var(--green)':t.pnl<0?'var(--red)':'var(--yellow)';
     const cardClass = t.outcome==='Win'?'win':t.outcome==='Loss'?'loss':'be';
+    const hasAnnotations = t.annotations&&t.annotations.length;
+    const expiryBadge = t.expiry?`<span style="font-family:var(--mono);font-size:8px;color:var(--orange)">📅 ${fmtExpiry(t.expiry)}</span>`:'';
+    const actionBtns = `<div class="chart-card-actions">
+      <button class="cc-action-btn" onclick="event.stopPropagation();openAnnotate('${t.id}')" title="Annotate chart">📍</button>
+      <button class="cc-action-btn" onclick="event.stopPropagation();openTemplate('${t.id}')" title="View trade template">📋</button>
+    </div>`;
+    const annotatedBadge = hasAnnotations ? `<div class="cc-badge-annotated">📍 annotated</div>` : '';
     if(t.chartImage){
       return `<div class="chart-card ${cardClass}" onclick="openDetail('${t.id}')">
         <img src="${t.chartImage}" alt="${t.ticker} chart"/>
+        ${annotatedBadge}
+        ${actionBtns}
         <div class="chart-card-overlay">
-          <div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">
+          <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:2px">
             <span class="chart-card-ticker">${t.ticker}</span>
             ${t.pattern?`<span style="font-family:var(--mono);font-size:8px;color:var(--teal)">${t.pattern}</span>`:''}
           </div>
           <div class="chart-card-meta">${fmtDate(t.date)} · <span class="src-badge ${srcClass}" style="font-size:8px">${t.source}</span></div>
+          ${expiryBadge}
           <div class="chart-card-pnl" style="color:${pnlColor};margin-top:3px">${t.pnl>=0?'+':''}$${t.pnl.toFixed(2)}</div>
         </div>
       </div>`;
     } else {
       return `<div class="chart-card ${cardClass}" onclick="openDetail('${t.id}')">
-        <div class="chart-no-img">📊</div>
+        <div class="chart-no-img">📊<div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-top:6px">No screenshot</div></div>
+        ${actionBtns}
         <div class="chart-card-overlay">
           <div class="chart-card-ticker">${t.ticker}</div>
           <div class="chart-card-meta">${fmtDate(t.date)}</div>
+          ${expiryBadge}
           <div class="chart-card-pnl" style="color:${pnlColor}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(2)}</div>
         </div>
       </div>`;
@@ -1389,15 +1511,17 @@ function openDetail(id){
     <div class="drow"><span class="dk">Outcome</span><span class="dv">${t.outcome==='Win'?'🟢 Win':t.outcome==='Loss'?'🔴 Loss':'🟡 Break Even'}</span></div>
     <div class="drow"><span class="dk">Source</span><span class="dv"><span class="src-badge ${srcClass}">${t.source}</span></span></div>
     ${t.entry?`<div class="drow"><span class="dk">Avg Entry</span><span class="dv" style="color:var(--blue)">$${parseFloat(t.entry).toFixed(2)}</span></div>`:''}
-    ${t.legs && t.legs.length ? `<div class="drow" style="flex-direction:column;align-items:flex-start;gap:6px"><span class="dk" style="margin-bottom:2px">Legs (${t.legs.length})</span>${t.legs.map((l,i)=>{
+    ${t.legs && t.legs.length ? `<div class="drow" style="flex-direction:column;align-items:flex-start;gap:8px"><span class="dk" style="margin-bottom:2px">Legs (${t.legs.length})</span>${t.legs.map((l,i)=>{
       const cb = parseFloat(l.costBasis||l.price||0).toFixed(2);
       const sz = l.size||1;
-      const strike = l.strike?` · $${l.strike}`:'';
-      const exp = l.expiry?` · exp ${l.expiry}`:'';
-      return `<span style="font-family:var(--mono);font-size:11px;color:var(--text)">Leg ${i+1}: <strong>$${cb}</strong> × ${sz} contract${sz!==1?'s':''}${strike}${exp}</span>`;
+      const strikePart = l.strike?` &nbsp;·&nbsp; Strike <strong style="color:var(--yellow)">$${l.strike}</strong>`:'';
+      const expPart = l.expiry?` &nbsp;·&nbsp; Exp <strong style="color:var(--orange)">${fmtExpiry(l.expiry)}</strong>`:'';
+      const timePart = l.time?` &nbsp;·&nbsp; <span style="color:var(--teal)">⏱ Bought ${fmt12h(l.time)}</span>`:'';
+      return `<div style="font-family:var(--mono);font-size:11px;color:var(--text);line-height:1.9"><span style="color:var(--muted2)">Leg ${i+1}:</span> <strong style="color:var(--blue)">$${cb}</strong> &times; ${sz} contract${sz!==1?'s':''}${strikePart}${expPart}${timePart}</div>`;
     }).join('')}</div>`:'' }
-    ${t.exit?`<div class="drow"><span class="dk">Exit</span><span class="dv">$${t.exit}</span></div>`:''}
+    ${t.exit?`<div class="drow"><span class="dk">Exit Price</span><span class="dv">$${parseFloat(t.exit).toFixed(2)}${t.exitTime?` &nbsp;<span style="font-size:10px;color:var(--teal)">⏱ Sold ${fmt12h(t.exitTime)}</span>`:''}</span></div>`:''}
     ${t.size?`<div class="drow"><span class="dk">Total Contracts</span><span class="dv">${t.size}</span></div>`:''}
+    ${t.expiry?`<div class="drow"><span class="dk">Contract Expiry</span><span class="dv" style="color:var(--orange)">${fmtExpiry(t.expiry)}</span></div>`:''}
     ${t.pattern?`<div class="drow"><span class="dk">Pattern</span><span class="dv" style="color:var(--teal)">${t.pattern}</span></div>`:''}
     ${t.candle?`<div class="drow"><span class="dk">Entry Candle</span><span class="dv" style="color:var(--purple)">${t.candle}</span></div>`:''}
     ${t.mood?`<div class="drow"><span class="dk">Mood</span><span class="dv">${t.mood}</span></div>`:''}`;
@@ -1449,6 +1573,7 @@ function editFromDetail(){
   set('emotionInp', t.emotion || '');
   set('patternInp', t.pattern || '');
   set('candleInp',  t.candle || '');
+  set('exitTimeInp', t.exitTime || '');
 
   setOutcome(t.outcome==='BE' ? 'BE' : (t.outcome || 'Win'));
   setSrcByName(t.source || 'Fakes Trade');
@@ -1553,7 +1678,7 @@ function renderLegs(){
             oninput="legs[${i}].strike=this.value;recalcLegs()"/>
         </div>
         <div class="leg-field">
-          <div class="leg-field-label">Expiry</div>
+          <div class="leg-field-label">Expiry Date</div>
           <input type="date" placeholder="—"
             value="${leg.expiry||''}"
             oninput="legs[${i}].expiry=this.value"/>
@@ -1569,6 +1694,12 @@ function renderLegs(){
           <input type="number" step="1" inputmode="decimal" placeholder="1"
             value="${leg.size||''}"
             oninput="legs[${i}].size=parseFloat(this.value)||0;recalcLegs()"/>
+        </div>
+        <div class="leg-field">
+          <div class="leg-field-label">Time Bought ⏱</div>
+          <input type="time" placeholder="—"
+            value="${leg.time||''}"
+            oninput="legs[${i}].time=this.value"/>
         </div>
       </div>
       ${hint}
@@ -1702,6 +1833,7 @@ function saveTrade(){
   const psychTags = getSelectedPsych();
   const pattern = document.getElementById('patternInp').value;
   const candle = document.getElementById('candleInp').value;
+  const exitTime = (document.getElementById('exitTimeInp')?.value||'').trim();
   if(!ticker){alert('Enter a ticker.');return;}
   if(!date){alert('Pick a date.');return;}
   if(legs.length===0){alert('Add at least one entry leg.');return;}
@@ -1749,7 +1881,8 @@ function saveTrade(){
     strike: topStrike,
     expiry: topExpiry,
     pnl,outcome,source:selSrc,notes,why,lesson,emotion,psychTags,pattern,candle,
-    mood:selMood,chartImage:chartImgData||null,aiAnalysis:stored_ai||null
+    mood:selMood,chartImage:chartImgData||null,aiAnalysis:stored_ai||null,
+    exitTime:exitTime||''
   };
   if(editingId){
     const idx=d.findIndex(r=>r.id===editingId);
@@ -1983,8 +2116,223 @@ function renderSymbolPnl(data){
 
 /* ─── UTILS ─── */
 function fmtDate(d){ return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}); }
+function fmtExpiry(d){
+  if(!d) return '';
+  try{ return new Date(d+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'2-digit'}); }
+  catch{ return d; }
+}
+function fmt12h(t){
+  if(!t) return '';
+  try{
+    const [h,m] = t.split(':').map(Number);
+    const ampm = h>=12?'PM':'AM';
+    const h12 = h%12||12;
+    return `${h12}:${String(m).padStart(2,'0')} ${ampm}`;
+  } catch{ return t; }
+}
 
-['addModal','detailModal','dayModal'].forEach(id=>{
+/* ─── ANNOTATION TOOL ─── */
+let annotateTradeId = null;
+let annotateLayer = []; // [{type:'entry'|'exit'|'level', x, y, label}]
+let annotateTool = 'entry';
+let _annotateImg = null;
+
+function openAnnotate(id){
+  const t = getData().find(r=>r.id===id); if(!t) return;
+  if(!t.chartImage){ alert('No chart screenshot on this trade.\nEdit the trade and upload one first.'); return; }
+  annotateTradeId = id;
+  annotateLayer = Array.isArray(t.annotations) ? JSON.parse(JSON.stringify(t.annotations)) : [];
+  document.getElementById('annotateModal').classList.add('open');
+  setAnnotateTool('entry');
+  const img = new Image();
+  img.onload = ()=>{
+    _annotateImg = img;
+    const canvas = document.getElementById('annotateCanvas');
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    drawAnnotations();
+  };
+  img.src = t.chartImage;
+}
+
+function closeAnnotate(){
+  document.getElementById('annotateModal').classList.remove('open');
+  annotateTradeId = null; _annotateImg = null;
+}
+
+function setAnnotateTool(tool){
+  annotateTool = tool;
+  ['entry','exit','level'].forEach(t=>{
+    const el = document.getElementById('tool-'+t);
+    if(el) el.classList.toggle('active', t===tool);
+  });
+  const msgs = {entry:'TAP ON CHART WHERE YOU ENTERED THE TRADE', exit:'TAP ON CHART WHERE YOU EXITED THE TRADE', level:'TAP TO ADD A HORIZONTAL PRICE LEVEL'};
+  document.getElementById('annotateInstruction').textContent = msgs[tool]||'TAP ON CHART TO PLACE MARKER';
+}
+
+function drawAnnotations(){
+  const canvas = document.getElementById('annotateCanvas');
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  if(_annotateImg) ctx.drawImage(_annotateImg,0,0,W,H);
+  annotateLayer.forEach(a=>{
+    const px = a.x*W, py = a.y*H;
+    if(a.type==='level'){
+      ctx.save();
+      ctx.strokeStyle='#6aa9ff'; ctx.lineWidth=Math.max(2,W*0.003);
+      ctx.setLineDash([10,5]);
+      ctx.beginPath(); ctx.moveTo(0,py); ctx.lineTo(W,py); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.font=`bold ${Math.max(11,W*0.016)}px Space Mono,monospace`;
+      ctx.fillStyle='rgba(13,10,8,.72)';
+      const lbl=a.label||'LEVEL'; const lw=ctx.measureText(lbl).width+12;
+      ctx.fillRect(6,py-18,lw,20);
+      ctx.fillStyle='#6aa9ff'; ctx.textBaseline='middle'; ctx.fillText(lbl,12,py-8);
+      ctx.restore();
+    } else {
+      const isEntry = a.type==='entry';
+      const r = Math.max(18,W*0.024);
+      ctx.save();
+      ctx.shadowColor='rgba(0,0,0,.6)'; ctx.shadowBlur=10;
+      ctx.beginPath(); ctx.arc(px,py,r,0,Math.PI*2);
+      ctx.fillStyle = isEntry?'#5fcf8a':'#ff6e6e'; ctx.fill();
+      ctx.restore();
+      ctx.save();
+      ctx.font=`bold ${Math.max(14,r*0.9)}px Arial`;
+      ctx.fillStyle = isEntry?'#000':'#fff';
+      ctx.textAlign='center'; ctx.textBaseline='middle';
+      ctx.fillText(isEntry?'↑':'↓',px,py);
+      const lbl = a.label||(isEntry?'ENTRY':'EXIT');
+      const fs = Math.max(10,W*0.013);
+      ctx.font=`bold ${fs}px Space Mono,monospace`;
+      const lw = ctx.measureText(lbl).width+10;
+      const lx = px>W/2 ? px-r-8-lw : px+r+8;
+      ctx.fillStyle='rgba(13,10,8,.78)';
+      ctx.fillRect(lx-2,py-fs*0.8,lw+4,fs*1.6);
+      ctx.fillStyle=isEntry?'#5fcf8a':'#ff6e6e';
+      ctx.textAlign='left'; ctx.textBaseline='middle';
+      ctx.fillText(lbl,lx+3,py);
+      ctx.restore();
+    }
+  });
+}
+
+function handleAnnotateEvent(e){
+  e.preventDefault();
+  const canvas = document.getElementById('annotateCanvas');
+  const rect = canvas.getBoundingClientRect();
+  const src = e.touches ? e.touches[0] : e;
+  const x = (src.clientX - rect.left) / rect.width;
+  const y = (src.clientY - rect.top) / rect.height;
+  let label = '';
+  if(annotateTool==='level'){
+    label = prompt('Label (e.g. "Support $42.50"):') || 'LEVEL';
+  }
+  annotateLayer.push({type:annotateTool, x, y, label});
+  drawAnnotations();
+}
+
+function undoAnnotation(){ if(annotateLayer.length){ annotateLayer.pop(); drawAnnotations(); } }
+function clearAnnotations(){ if(!annotateLayer.length) return; if(confirm('Clear all annotations?')){ annotateLayer=[]; drawAnnotations(); } }
+
+function saveAnnotations(){
+  const canvas = document.getElementById('annotateCanvas');
+  const annotatedImg = canvas.toDataURL('image/jpeg',0.88);
+  const d = getData();
+  const idx = d.findIndex(r=>r.id===annotateTradeId);
+  if(idx>=0){
+    d[idx].chartImage = annotatedImg;
+    d[idx].annotations = annotateLayer;
+    saveAll(d);
+  }
+  closeAnnotate(); renderAll();
+}
+
+(function(){
+  const canvas = document.getElementById('annotateCanvas');
+  canvas.addEventListener('click', handleAnnotateEvent);
+  canvas.addEventListener('touchend', e=>{ e.preventDefault(); handleAnnotateEvent(e.changedTouches?{...e, touches:e.changedTouches}:e); }, {passive:false});
+})();
+
+/* ─── TRADE TEMPLATE ─── */
+let galleryFilter = 'All';
+
+function setGalleryFilter(f){
+  galleryFilter = f;
+  document.querySelectorAll('#galleryFilterRow .filter-pill').forEach(el=>el.classList.toggle('active',el.textContent.trim().startsWith(f)||(f==='All'&&el.textContent.trim()==='All')));
+  renderGallery(getMonthData());
+}
+
+function openTemplate(id){
+  const t = getData().find(r=>r.id===id); if(!t) return;
+  document.getElementById('templateContent').innerHTML = buildTemplate(t);
+  document.getElementById('templateModal').classList.add('open');
+}
+function closeTemplate(){ document.getElementById('templateModal').classList.remove('open'); }
+
+function buildTemplate(t){
+  const pnlColor = t.pnl>0?'var(--green)':t.pnl<0?'var(--red)':'var(--yellow)';
+  const oc = t.outcome==='Win'?'win':t.outcome==='Loss'?'loss':'be';
+  const srcClass = SRC_CLASSES[t.source]||'';
+  const validLegs = (t.legs||[]).filter(l=>parseFloat(l.costBasis||l.price||0)>0);
+  const totalC = validLegs.reduce((s,l)=>s+(parseFloat(l.size)||1),0);
+  const avgEntry = totalC>0 ? (validLegs.reduce((s,l)=>s+(parseFloat(l.costBasis||l.price||0)*(parseFloat(l.size)||1)),0)/totalC).toFixed(2) : (t.entry?parseFloat(t.entry).toFixed(2):'—');
+  const exitPrice = t.exit ? `$${parseFloat(t.exit).toFixed(2)}` : '—';
+  const topExpiry = t.expiry || (validLegs.find(l=>l.expiry)||{}).expiry || '';
+  const firstTime = validLegs.find(l=>l.time);
+  return `<div class="trade-template">
+    <div class="tt-header" style="background:${t.outcome==='Win'?'rgba(95,207,138,.07)':t.outcome==='Loss'?'rgba(255,110,110,.07)':'rgba(255,209,102,.06)'}">
+      <div class="tt-ticker-block">
+        <div class="tt-ticker">${t.ticker}</div>
+        <span class="tt-badge ${oc}">${t.outcome==='Win'?'🟢':t.outcome==='Loss'?'🔴':'🟡'} ${t.outcome}</span>
+        <span class="tc-type ${t.type.toLowerCase()}" style="font-size:9px">${t.type}</span>
+      </div>
+      <div style="text-align:right">
+        <div class="tt-pnl" style="color:${pnlColor}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(2)}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--muted2);margin-top:2px">${fmtDate(t.date)}</div>
+      </div>
+    </div>
+    <div class="tt-chart-area">
+      ${t.chartImage
+        ? `<img src="${t.chartImage}" alt="${t.ticker} chart"/>`
+        : `<div class="tt-no-chart"><div>📊</div><div style="font-family:var(--mono);font-size:10px;color:var(--muted)">No chart screenshot</div></div>`}
+    </div>
+    <div class="tt-stats-row">
+      <div class="tt-stat">
+        <div class="tt-stat-val" style="color:var(--blue)">$${avgEntry}</div>
+        <div class="tt-stat-lbl">Avg Entry${firstTime?`<br><span style="color:var(--teal);font-size:7px">⏱ ${fmt12h(firstTime.time)}</span>`:''}</div>
+      </div>
+      <div class="tt-stat">
+        <div class="tt-stat-val" style="color:var(--muted2)">${exitPrice}${t.exitTime?`<span style="font-size:9px;color:var(--teal);display:block">⏱ ${fmt12h(t.exitTime)}</span>`:''}</div>
+        <div class="tt-stat-lbl">Exit</div>
+      </div>
+      <div class="tt-stat">
+        <div class="tt-stat-val" style="color:${pnlColor}">${t.pnl>=0?'+':''}$${t.pnl.toFixed(2)}</div>
+        <div class="tt-stat-lbl">P&amp;L</div>
+      </div>
+    </div>
+    ${topExpiry||t.pattern||t.candle||t.source?`
+    <div class="tt-section" style="padding-bottom:8px">
+      <div class="tt-tags">
+        ${topExpiry?`<span class="tt-tag" style="color:var(--orange);border-color:rgba(251,146,60,.35)">📅 Exp ${fmtExpiry(topExpiry)}</span>`:''}
+        ${t.pattern?`<span class="tt-tag" style="color:var(--teal);border-color:rgba(63,209,184,.3)">📐 ${t.pattern}</span>`:''}
+        ${t.candle?`<span class="tt-tag" style="color:var(--purple);border-color:rgba(184,157,251,.3)">🕯 ${t.candle}</span>`:''}
+        ${t.source?`<span class="src-badge ${srcClass}" style="font-size:8px">${t.source}</span>`:''}
+      </div>
+    </div>`:''
+    }
+    ${t.why?`<div class="tt-section"><div class="tt-section-label">📌 Why I Entered</div><div class="tt-section-text">"${t.why}"</div></div>`:''}
+    ${(t.psychTags&&t.psychTags.length)?`<div class="tt-section" style="padding-top:8px;padding-bottom:8px"><div class="tt-section-label">🧠 Psychology</div><div class="tt-tags" style="margin-top:6px">${t.psychTags.map(tag=>{const d=['FOMO','Revenge Trade','Bored','Forced','Overconfident','Tilted','Chased'];const g=['Followed Plan','A+ Setup','Patient'];const c=d.includes(tag)?'var(--red)':g.includes(tag)?'var(--green)':'var(--gold)';return `<span class="tt-tag" style="color:${c};border-color:${c}44">${tag}</span>`;}).join('')}</div></div>`:''}
+    ${t.lesson?`<div class="tt-section" style="background:rgba(245,176,71,.05);border-top:1px solid rgba(245,176,71,.2)"><div class="tt-section-label" style="color:var(--gold)">💡 Lesson Learned</div><div class="tt-section-text" style="color:var(--yellow)">"${t.lesson}"</div></div>`:''}
+    <div class="tt-action-row">
+      ${t.chartImage?`<button class="save-btn" style="background:rgba(63,209,184,.1);color:var(--teal);border:1px solid rgba(63,209,184,.3)" onclick="closeTemplate();openAnnotate('${t.id}')">📍 Annotate Chart</button>`:''}
+      <button class="save-btn" style="background:var(--s3);color:var(--green);border:1px solid var(--green)" onclick="closeTemplate();openDetail('${t.id}')">View Full Detail</button>
+    </div>
+  </div>`;
+}
+
+['addModal','detailModal','dayModal','annotateModal','templateModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',function(e){ if(e.target===this) this.classList.remove('open'); });
 });
 </script>
