@@ -7,18 +7,27 @@
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#07080c;--s1:#0d0f17;--s2:#131621;--s3:#1a1d2e;--border:#222535;
-  --green:#39d98a;--green2:#1a6644;--red:#ff5c5c;--red2:#6b2323;
-  --yellow:#ffd166;--blue:#4da6ff;--purple:#a78bfa;--orange:#fb923c;
-  --teal:#2dd4bf;--gold:#f59e0b;
-  --text:#eef0f6;--muted:#424862;--muted2:#7a8094;
+  /* warm-leaning dark base — leather notebook over a desk */
+  --bg:#0d0a08;--s1:#181410;--s2:#211b15;--s3:#2a221b;--border:#3a2f25;
+  --green:#5fcf8a;--green2:#1a6644;--red:#ff6e6e;--red2:#6b2323;
+  --yellow:#ffd166;--blue:#6aa9ff;--purple:#b89dfb;--orange:#fb923c;
+  --teal:#3fd1b8;--gold:#f5b047;
+  /* warm paper/sticky tones */
+  --paper:#f5ead0;--paper-2:#f0e0b6;--paper-3:#ffd97a;--paper-4:#ffcb9a;
+  --paper-shadow:rgba(40,25,10,.45);
+  --ink:#332417;
+  --text:#f4ecdf;--muted:#5a4a3a;--muted2:#988672;
   --mono:'Space Mono',monospace;
   --sans:'Plus Jakarta Sans','Syne',sans-serif;
   --head:'Syne',sans-serif;
   --r:12px;
-  --glow-g:0 0 24px rgba(57,217,138,.18);
-  --glow-r:0 0 24px rgba(255,92,92,.15);
-  --glow-b:0 0 24px rgba(77,166,255,.18);
+  --glow-g:0 0 24px rgba(95,207,138,.20);
+  --glow-r:0 0 24px rgba(255,110,110,.15);
+  --glow-b:0 0 24px rgba(106,169,255,.18);
+  --soft-shadow:0 2px 10px rgba(20,12,4,.45), 0 1px 2px rgba(20,12,4,.35);
+  --soft-shadow-lg:0 12px 36px rgba(20,12,4,.55), 0 4px 10px rgba(20,12,4,.4);
+  /* tiny svg-noise paper grain — applied as inline data uri */
+  --paper-grain:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18  0 0 0 0 0.13  0 0 0 0 0.08  0 0 0 0.20 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/></svg>");
 }
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
 body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh;overscroll-behavior:none;}
@@ -305,6 +314,196 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
 /* ── ANALYTICS ── */
 .analytics-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+
+/* ── PAPER NOTEBOOK FEEL ── */
+body{
+  background:
+    radial-gradient(1200px 600px at 20% -10%, rgba(245,176,71,.04), transparent 60%),
+    radial-gradient(900px 500px at 90% 10%, rgba(184,157,251,.04), transparent 60%),
+    var(--bg);
+}
+.journal-card,
+.cal-wrap,
+.equity-wrap,
+.source-bars,
+.analytics-card,
+.scard,
+.trade-card,
+.streak-box,
+.week-row{
+  box-shadow:var(--soft-shadow);
+}
+.journal-card{
+  background:linear-gradient(180deg, #1d1813 0%, #1a1510 100%);
+  background-image:var(--paper-grain), linear-gradient(180deg, #1d1813 0%, #1a1510 100%);
+  border-color:#3a2f25;
+  position:relative;
+}
+.journal-card::before{
+  content:"";position:absolute;left:0;top:14px;bottom:14px;width:2px;
+  background:linear-gradient(180deg, transparent, rgba(245,176,71,.45), transparent);
+  border-radius:2px;
+}
+.cal-day{
+  background-image:var(--paper-grain);
+  background-blend-mode:overlay;
+}
+.cal-day.has-trades.win{
+  background:linear-gradient(135deg,rgba(95,207,138,.10),rgba(95,207,138,.04));
+  background-image:var(--paper-grain),linear-gradient(135deg,rgba(95,207,138,.10),rgba(95,207,138,.04));
+}
+.cal-day.has-trades.loss{
+  background:linear-gradient(135deg,rgba(255,110,110,.10),rgba(255,110,110,.04));
+  background-image:var(--paper-grain),linear-gradient(135deg,rgba(255,110,110,.10),rgba(255,110,110,.04));
+}
+.cal-day.has-trades.be{
+  background:linear-gradient(135deg,rgba(255,209,102,.10),rgba(255,209,102,.04));
+  background-image:var(--paper-grain),linear-gradient(135deg,rgba(255,209,102,.10),rgba(255,209,102,.04));
+}
+
+/* ── CALENDAR MARKET-CONTEXT STICKY BADGES ── */
+.cal-day{min-height:74px;}
+.cal-events{
+  position:absolute;
+  right:3px;bottom:3px;
+  display:flex;flex-direction:column;gap:2px;
+  align-items:flex-end;
+  max-width:80%;
+  pointer-events:none; /* let cell click through */
+  z-index:2;
+}
+.cal-event{
+  font-family:var(--mono);
+  font-size:8px;
+  letter-spacing:.4px;
+  padding:2px 5px;
+  border-radius:3px;
+  line-height:1.15;
+  color:var(--ink);
+  box-shadow:0 1px 2px var(--paper-shadow), 0 0 0 1px rgba(0,0,0,.15) inset;
+  transform:rotate(-2.5deg);
+  transform-origin:center;
+  white-space:nowrap;
+  pointer-events:auto;
+  cursor:default;
+  max-width:100%;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.cal-event:nth-child(odd){transform:rotate(1.8deg);}
+.cal-event:nth-child(3n){transform:rotate(-1.2deg);}
+.cal-event.econ   {background:var(--paper-3);color:#3a2a05;border-top:6px solid #e0a930;}
+.cal-event.fomc   {background:#ffb19a;color:#4a1c0c;border-top:6px solid #d76233;}
+.cal-event.holiday{background:#cfe6b0;color:#2a3a18;border-top:6px solid #6f9a3e;}
+.cal-event.mom    {background:#ffc8df;color:#4a1a2e;border-top:6px solid #d96a9f;}
+.cal-event.market {background:#d5d2c2;color:#2a2818;border-top:6px solid #a39d80;}
+.cal-event.news   {background:#c8d8ff;color:#1c2a4a;border-top:6px solid #5a7ed1;}
+.cal-event.personal{background:#e8c6ff;color:#2c123a;border-top:6px solid #9a6bd1;}
+.cal-event .ce-i{margin-right:2px;}
+/* event-only days get a faint tinted paper */
+.cal-day.event-day:not(.has-trades){
+  background:linear-gradient(135deg, rgba(245,176,71,.05), rgba(245,176,71,.015));
+  background-image:var(--paper-grain), linear-gradient(135deg, rgba(245,176,71,.05), rgba(245,176,71,.015));
+}
+
+/* Sticky-note tooltip on hover */
+.cal-event:hover{
+  z-index:3;
+  transform:rotate(0deg) scale(1.06);
+  transition:transform .12s ease;
+}
+
+/* ── EMOTION / PSYCH BLOCK ── */
+.psych-wrap{
+  border:1px dashed rgba(245,176,71,.35);
+  border-radius:10px;
+  padding:12px;
+  background:
+    var(--paper-grain),
+    linear-gradient(180deg, rgba(245,176,71,.06), rgba(245,176,71,.02));
+  background-blend-mode:overlay,normal;
+  margin-bottom:12px;
+}
+.psych-label{
+  font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1.5px;
+  color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.psych-chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px;}
+.psych-chip{
+  font-family:var(--mono);font-size:10px;letter-spacing:.5px;
+  padding:5px 10px;border-radius:14px;border:1px solid var(--border);
+  background:var(--s2);color:var(--muted2);cursor:pointer;
+  transition:all .15s;text-transform:uppercase;user-select:none;
+}
+.psych-chip:hover{border-color:var(--gold);color:var(--gold);}
+.psych-chip.active{
+  background:rgba(245,176,71,.18);
+  border-color:var(--gold);
+  color:var(--gold);
+  font-weight:700;
+  box-shadow:inset 0 0 0 1px rgba(245,176,71,.35);
+}
+.psych-chip.danger.active{background:rgba(255,110,110,.18);border-color:var(--red);color:var(--red);box-shadow:inset 0 0 0 1px rgba(255,110,110,.35);}
+.psych-chip.good.active{background:rgba(95,207,138,.18);border-color:var(--green);color:var(--green);box-shadow:inset 0 0 0 1px rgba(95,207,138,.35);}
+#emotionInp{
+  width:100%;background:rgba(13,10,8,.65);border:1px solid var(--border);
+  border-radius:8px;padding:11px 12px;font-family:var(--sans);font-size:13px;
+  color:var(--text);outline:none;line-height:1.7;min-height:78px;resize:vertical;
+  transition:border-color .2s;
+}
+#emotionInp:focus{border-color:var(--gold);}
+
+/* ── EXPANDED LEG ROW (Edit-mode-friendly) ── */
+.leg-row.expanded{
+  display:block;
+  padding:12px 14px;
+  background:linear-gradient(180deg, rgba(63,209,184,.05), rgba(63,209,184,.01));
+  border-color:rgba(63,209,184,.25);
+}
+.leg-row.expanded .leg-head{
+  display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;
+}
+.leg-row.expanded .leg-head-title{
+  font-family:var(--mono);font-size:10px;color:var(--teal);letter-spacing:1.4px;
+  text-transform:uppercase;font-weight:700;
+}
+.leg-row.expanded .leg-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:8px;
+}
+@media(max-width:520px){
+  .leg-row.expanded .leg-grid{grid-template-columns:1fr 1fr;}
+}
+.leg-row.expanded .leg-field-label{
+  font-family:var(--mono);font-size:8px;color:var(--muted2);
+  letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;
+}
+.leg-row.expanded input,
+.leg-row.expanded .leg-field input{
+  background:var(--s3);border:1px solid var(--border);border-radius:6px;
+  padding:8px 9px;font-family:var(--mono);font-size:12px;color:var(--text);
+  outline:none;width:100%;transition:border-color .15s;
+}
+.leg-row.expanded input:focus{border-color:var(--teal);}
+.override-hint{
+  display:flex;align-items:center;gap:6px;
+  margin-top:8px;padding:6px 10px;border-radius:6px;
+  background:rgba(245,176,71,.08);border:1px solid rgba(245,176,71,.25);
+  font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.5px;
+}
+.leg-row.expanded.auto-imported{border-color:rgba(95,207,138,.35);}
+.leg-row.expanded.auto-imported .leg-head-title::after{
+  content:" · AUTO";color:var(--green);font-size:9px;margin-left:6px;
+}
+
+/* ── EVENT LEGEND (small, optional) ── */
+.event-legend{
+  display:flex;gap:10px;flex-wrap:wrap;margin:2px 0 12px;
+  font-family:var(--mono);font-size:9px;color:var(--muted2);
+}
+.event-legend .lg-dot{
+  display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;
+  vertical-align:middle;box-shadow:0 1px 2px var(--paper-shadow);
+}
 </style>
 </head>
 <body>
@@ -374,6 +573,14 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 
   <!-- CALENDAR -->
   <div class="view" id="tab-calendar">
+    <div class="event-legend" id="eventLegend">
+      <span><span class="lg-dot" style="background:var(--paper-3)"></span>Econ Data</span>
+      <span><span class="lg-dot" style="background:#ffb19a"></span>FOMC</span>
+      <span><span class="lg-dot" style="background:#cfe6b0"></span>Holiday</span>
+      <span><span class="lg-dot" style="background:#d5d2c2"></span>Market Closed</span>
+      <span><span class="lg-dot" style="background:#c8d8ff"></span>News</span>
+      <span><span class="lg-dot" style="background:#e8c6ff"></span>Personal</span>
+    </div>
     <div class="cal-section">
       <div class="cal-main">
         <div class="cal-wrap">
@@ -549,6 +756,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       </div>
     </div>
 
+    <!-- Emotion / Psychology -->
+    <div class="psych-wrap">
+      <div class="psych-label">🧠 Emotion / Psychology — why did you really take this trade?</div>
+      <div class="psych-chips" id="psychChips">
+        <div class="psych-chip good"  data-tag="Followed Plan" onclick="togglePsych(this)">✓ Followed Plan</div>
+        <div class="psych-chip good"  data-tag="A+ Setup"      onclick="togglePsych(this)">A+ Setup</div>
+        <div class="psych-chip good"  data-tag="Patient"       onclick="togglePsych(this)">Patient</div>
+        <div class="psych-chip"       data-tag="Conviction"    onclick="togglePsych(this)">Conviction</div>
+        <div class="psych-chip"       data-tag="News Driven"   onclick="togglePsych(this)">News Driven</div>
+        <div class="psych-chip danger" data-tag="FOMO"         onclick="togglePsych(this)">⚠ FOMO</div>
+        <div class="psych-chip danger" data-tag="Revenge Trade" onclick="togglePsych(this)">🩸 Revenge</div>
+        <div class="psych-chip danger" data-tag="Bored"        onclick="togglePsych(this)">Bored</div>
+        <div class="psych-chip danger" data-tag="Forced"       onclick="togglePsych(this)">Forced Entry</div>
+        <div class="psych-chip danger" data-tag="Overconfident" onclick="togglePsych(this)">Overconfident</div>
+        <div class="psych-chip danger" data-tag="Tilted"       onclick="togglePsych(this)">Tilted</div>
+        <div class="psych-chip danger" data-tag="Chased"       onclick="togglePsych(this)">Chased</div>
+      </div>
+      <textarea id="emotionInp" placeholder="Write it out — what was going through your head? Were you patient? Scared? Did you break a rule?"></textarea>
+    </div>
+
     <!-- How I Feel -->
     <div class="field">
       <label>How I Felt Going In</label>
@@ -633,6 +860,49 @@ const SK = "jo_trades_v2";
 const SOURCES = ["Fakes Trade","J Tradez","Enrich Trades","Own Trade","Other"];
 const SRC_COLORS = {"Fakes Trade":"#a78bfa","J Tradez":"#4da6ff","Enrich Trades":"#39d98a","Own Trade":"#fb923c","Other":"#7a8094","Robinhood":"#39d98a"};
 const SRC_CLASSES = {"Fakes Trade":"fake","J Tradez":"jt","Enrich Trades":"enrich","Own Trade":"own","Other":"","Robinhood":"enrich"};
+
+/* ─── MARKET CONTEXT EVENTS ─── */
+/* Each entry: {date:"YYYY-MM-DD", type:"econ|fomc|holiday|market|news|mom|personal", icon, label, tip} */
+const MARKET_EVENTS = [
+  // — May 2026 sample data —
+  {date:"2026-05-10", type:"mom",     icon:"💐", label:"Mother's Day",     tip:"Mother's Day"},
+  {date:"2026-05-12", type:"econ",    icon:"📊", label:"CPI",              tip:"CPI release — inflation print"},
+  {date:"2026-05-13", type:"econ",    icon:"📈", label:"PPI",              tip:"PPI release — producer prices"},
+  {date:"2026-05-25", type:"market",  icon:"🇺🇸", label:"Memorial Day",     tip:"US market closed"},
+  // typical FOMC days for 2026 — adjust as needed
+  {date:"2026-01-28", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-03-18", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-04-29", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-06-17", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-07-29", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-09-16", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-11-04", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-12-16", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  // major US market holidays 2026
+  {date:"2026-01-01", type:"market",  icon:"🎉", label:"New Year",         tip:"US market closed"},
+  {date:"2026-01-19", type:"market",  icon:"✊", label:"MLK Day",           tip:"US market closed"},
+  {date:"2026-02-16", type:"market",  icon:"🇺🇸", label:"Presidents Day",   tip:"US market closed"},
+  {date:"2026-04-03", type:"market",  icon:"✝️", label:"Good Friday",      tip:"US market closed"},
+  {date:"2026-06-19", type:"market",  icon:"🎗", label:"Juneteenth",       tip:"US market closed"},
+  {date:"2026-07-03", type:"market",  icon:"🎆", label:"July 4 (obs)",     tip:"US market closed (observed)"},
+  {date:"2026-09-07", type:"market",  icon:"🛠", label:"Labor Day",        tip:"US market closed"},
+  {date:"2026-11-26", type:"market",  icon:"🦃", label:"Thanksgiving",     tip:"US market closed"},
+  {date:"2026-12-25", type:"market",  icon:"🎄", label:"Christmas",        tip:"US market closed"},
+  // personal / political markers
+  {date:"2026-05-12", type:"personal", icon:"🤝", label:"Trump Meeting",   tip:"Personal note — Trump meeting"},
+];
+
+/* Helper: pull all events for a YYYY-MM-DD */
+function eventsForDate(ds){
+  return MARKET_EVENTS.filter(e=>e.date===ds).concat(getCustomEvents().filter(e=>e.date===ds));
+}
+/* User can add their own events stored in localStorage */
+function getCustomEvents(){ try{ return JSON.parse(localStorage.getItem('jo_trades_events')||'[]'); }catch{ return []; } }
+function saveCustomEvent(ev){
+  const list = getCustomEvents();
+  list.push(ev);
+  localStorage.setItem('jo_trades_events', JSON.stringify(list));
+}
 
 let month = new Date().getMonth(), year = new Date().getFullYear();
 let selSrc = "Fakes Trade", selOutcome = "Win", selMood = "😤";
@@ -913,13 +1183,28 @@ function renderCalendar(data){
   for(let d=1;d<=daysInMonth;d++){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const info=byDay[ds]; const isToday=ds===todayStr;
-    let cls='cal-day'+(isToday?' today':'');
+    const events = eventsForDate(ds);
+    let cls='cal-day'+(isToday?' today':'')+(events.length?' event-day':'');
     let inner=`<div class="cal-day-num">${d}</div>`;
     if(info){
       const pos=info.pnl>0,neg=info.pnl<0;
       cls+=' has-trades '+(pos?'win':neg?'loss':'be');
       inner+=`<div class="cal-pnl ${pos?'g':neg?'r':'y'}">${pos?'+':''}$${Math.abs(info.pnl).toFixed(0)}</div>`;
       inner+=`<div class="cal-count">${info.count}t</div>`;
+    }
+    if(events.length){
+      // show up to 2 stickies; condense the rest into a "+N" pill
+      const visible = events.slice(0,2);
+      const extra = events.length - visible.length;
+      let badges = visible.map(ev=>{
+        const safe = (ev.tip||ev.label).replace(/"/g,'&quot;');
+        return `<span class="cal-event ${ev.type}" title="${safe}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`;
+      }).join('');
+      if(extra>0){
+        const moreTitle = events.slice(2).map(e=>e.label).join(' · ').replace(/"/g,'&quot;');
+        badges += `<span class="cal-event news" title="${moreTitle}">+${extra} more</span>`;
+      }
+      inner += `<div class="cal-events">${badges}</div>`;
     }
     html+=`<div class="${cls}" onclick="openDayModal('${ds}')">${inner}</div>`;
   }
@@ -948,13 +1233,25 @@ function openDayModal(dateStr){
   const trades = getData().filter(t=>t.date===dateStr);
   const label = new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   document.getElementById('dayModalTitle').textContent=label;
+
+  // Market context stickies for this day
+  const evs = eventsForDate(dateStr);
+  let evHtml = '';
+  if(evs.length){
+    evHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(245,176,71,.06),rgba(245,176,71,.01));border:1px dashed rgba(245,176,71,.3)">`
+      + `<div style="width:100%;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Market Context</div>`
+      + evs.map(ev=>`<span class="cal-event ${ev.type}" title="${(ev.tip||'').replace(/"/g,'&quot;')}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`).join('')
+      + `</div>`;
+  }
+
   if(!trades.length){
-    document.getElementById('dayModalContent').innerHTML='<div class="empty"><div class="empty-i">📅</div>No trades on this day</div>';
+    document.getElementById('dayModalContent').innerHTML = evHtml +
+      '<div class="empty"><div class="empty-i">📅</div>No trades on this day</div>';
   } else {
     const dayPnl = trades.reduce((s,t)=>s+t.pnl,0);
-    document.getElementById('dayModalContent').innerHTML=
+    document.getElementById('dayModalContent').innerHTML = evHtml +
       `<div style="font-family:var(--mono);font-size:15px;font-weight:700;margin-bottom:12px;color:${dayPnl>=0?'var(--green)':'var(--red)'}">${dayPnl>=0?'+':''}$${dayPnl.toFixed(2)} <span style="color:var(--muted);font-size:11px">${trades.length} trade${trades.length>1?'s':''}</span></div>`
-      +trades.map(t=>tradeCard(t)).join('');
+      + trades.map(t=>tradeCard(t)).join('');
   }
   document.getElementById('dayModal').classList.add('open');
 }
@@ -1059,7 +1356,13 @@ function renderJournal(data){
       <div class="journal-fields">
         ${t.pattern?`<span class="jf-pill jf-pattern">📐 ${t.pattern}</span>`:''}
         ${t.candle?`<span class="jf-pill jf-candle">🕯 ${t.candle}</span>`:''}
+        ${(t.psychTags||[]).slice(0,4).map(tag=>{
+          const dangerSet=['FOMO','Revenge Trade','Bored','Forced','Overconfident','Tilted','Chased'];
+          const color = dangerSet.includes(tag)?'var(--red)':tag==='Followed Plan'||tag==='A+ Setup'||tag==='Patient'?'var(--green)':'var(--gold)';
+          return `<span class="jf-pill" style="background:rgba(245,176,71,.08);color:${color};border:1px solid ${color}33">🧠 ${tag}</span>`;
+        }).join('')}
       </div>
+      ${t.emotion?`<div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:8px;padding:8px 10px;background:rgba(245,176,71,.05);border-left:2px solid var(--gold);border-radius:6px"><span style="font-family:var(--mono);font-size:9px;color:var(--gold);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px">🧠 Emotion</span><em>${t.emotion.slice(0,180)}${t.emotion.length>180?'…':''}</em></div>`:''}
       ${t.why?`<div style="font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:8px"><span style="font-family:var(--mono);font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px">Why I Entered</span><em>${t.why.slice(0,150)}${t.why.length>150?'…':''}</em></div>`:''}
       ${t.notes?`<div class="journal-notes">"${t.notes.slice(0,200)}${t.notes.length>200?'…':''}"</div>`:''}
       ${t.lesson?`<div style="font-size:12px;line-height:1.65;padding:8px 10px;background:rgba(245,158,11,.07);border-radius:6px;border-left:2px solid var(--gold);color:var(--yellow);margin-bottom:10px"><span style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1px;display:block;margin-bottom:3px">Lesson</span>${t.lesson.slice(0,150)}${t.lesson.length>150?'…':''}</div>`:''}
@@ -1086,7 +1389,13 @@ function openDetail(id){
     <div class="drow"><span class="dk">Outcome</span><span class="dv">${t.outcome==='Win'?'🟢 Win':t.outcome==='Loss'?'🔴 Loss':'🟡 Break Even'}</span></div>
     <div class="drow"><span class="dk">Source</span><span class="dv"><span class="src-badge ${srcClass}">${t.source}</span></span></div>
     ${t.entry?`<div class="drow"><span class="dk">Avg Entry</span><span class="dv" style="color:var(--blue)">$${parseFloat(t.entry).toFixed(2)}</span></div>`:''}
-    ${t.legs && t.legs.length>1 ? `<div class="drow" style="flex-direction:column;align-items:flex-start;gap:6px"><span class="dk" style="margin-bottom:2px">Legs (${t.legs.length})</span>${t.legs.map((l,i)=>`<span style="font-family:var(--mono);font-size:11px;color:var(--text)">Leg ${i+1}: <strong>$${parseFloat(l.price||0).toFixed(2)}</strong> × ${l.size||1} contract${(l.size||1)!==1?'s':''}</span>`).join('')}</div>`:'' }
+    ${t.legs && t.legs.length ? `<div class="drow" style="flex-direction:column;align-items:flex-start;gap:6px"><span class="dk" style="margin-bottom:2px">Legs (${t.legs.length})</span>${t.legs.map((l,i)=>{
+      const cb = parseFloat(l.costBasis||l.price||0).toFixed(2);
+      const sz = l.size||1;
+      const strike = l.strike?` · $${l.strike}`:'';
+      const exp = l.expiry?` · exp ${l.expiry}`:'';
+      return `<span style="font-family:var(--mono);font-size:11px;color:var(--text)">Leg ${i+1}: <strong>$${cb}</strong> × ${sz} contract${sz!==1?'s':''}${strike}${exp}</span>`;
+    }).join('')}</div>`:'' }
     ${t.exit?`<div class="drow"><span class="dk">Exit</span><span class="dv">$${t.exit}</span></div>`:''}
     ${t.size?`<div class="drow"><span class="dk">Total Contracts</span><span class="dv">${t.size}</span></div>`:''}
     ${t.pattern?`<div class="drow"><span class="dk">Pattern</span><span class="dv" style="color:var(--teal)">${t.pattern}</span></div>`:''}
@@ -1094,6 +1403,20 @@ function openDetail(id){
     ${t.mood?`<div class="drow"><span class="dk">Mood</span><span class="dv">${t.mood}</span></div>`:''}`;
   const jBoxes = document.getElementById('detailJournalBoxes');
   let jHtml = '';
+  // Surface psych chips at the top — most important signal for self-review
+  if((t.psychTags && t.psychTags.length) || (t.emotion && t.emotion.trim())){
+    const chipHtml = (t.psychTags||[]).map(tag=>{
+      const dangerSet = ['FOMO','Revenge Trade','Bored','Forced','Overconfident','Tilted','Chased'];
+      const goodSet = ['Followed Plan','A+ Setup','Patient'];
+      const cls = dangerSet.includes(tag)?'danger active':goodSet.includes(tag)?'good active':'active';
+      return `<span class="psych-chip ${cls}">${tag}</span>`;
+    }).join('');
+    jHtml += `<div class="journal-box psych-wrap" style="margin-top:10px">
+      <div class="psych-label">🧠 Emotion / Psychology</div>
+      ${chipHtml?`<div class="psych-chips" style="margin-bottom:${t.emotion?'10px':'0'}">${chipHtml}</div>`:''}
+      ${t.emotion?`<div class="jb-text" style="font-style:italic">${t.emotion}</div>`:''}
+    </div>`;
+  }
   if(t.why) jHtml+=`<div class="journal-box" style="margin-top:10px"><div class="jb-label">Why I Entered</div><div class="jb-text">${t.why}</div></div>`;
   if(t.notes) jHtml+=`<div class="journal-box" style="margin-top:8px"><div class="jb-label">Journal</div><div class="jb-text">${t.notes}</div></div>`;
   if(t.lesson) jHtml+=`<div class="journal-box" style="margin-top:8px;border-color:rgba(245,158,11,.3);background:rgba(245,158,11,.06)"><div class="jb-label" style="color:var(--gold)">Lesson Learned</div><div class="jb-text" style="color:var(--yellow)">${t.lesson}</div></div>`;
@@ -1111,32 +1434,74 @@ function editFromDetail(){
   const t = getData().find(r=>r.id===detailId); if(!t) return;
   closeDetail();
   editingId = t.id;
-  document.getElementById('tickerInp').value = t.ticker;
-  document.getElementById('dateInp').value = t.date;
-  document.getElementById('typeInp').value = t.type;
-  document.getElementById('entryInp').value = t.entry||'';
-  document.getElementById('exitInp').value = t.exit||'';
-  document.getElementById('sizeInp').value = t.size||'';
-  document.getElementById('pnlInp').value = t.pnl||'';
-  document.getElementById('notesInp').value = t.notes||'';
-  document.getElementById('whyInp').value = t.why||'';
-  document.getElementById('lessonInp').value = t.lesson||'';
-  document.getElementById('patternInp').value = t.pattern||'';
-  document.getElementById('candleInp').value = t.candle||'';
-  setOutcome(t.outcome==='BE'?'BE':t.outcome);
-  setSrcByName(t.source);
-  selMood = t.mood||'😤';
-  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active',b.dataset.mood===selMood));
-  // Restore legs
-  legs = t.legs && t.legs.length ? [...t.legs] : [{price:t.entry||0, size:t.size||1}];
-  renderLegs();
-  if(t.chartImage){
-    chartImgData = t.chartImage;
-    document.getElementById('chartPreview').src = t.chartImage;
-    document.getElementById('chartPreview').classList.add('show');
-    document.getElementById('chartLabel').style.display = 'none';
-    document.getElementById('aiScanBtn').style.display = 'flex';
+
+  // Helper — safe-set (skip if element missing)
+  const set = (id,val)=>{ const el=document.getElementById(id); if(el) el.value = val==null?'':val; };
+
+  set('tickerInp', t.ticker);
+  set('dateInp',   t.date);
+  set('typeInp',   t.type || 'Call');
+  set('exitInp',   t.exit ?? '');
+  set('pnlInp',    t.pnl ?? '');
+  set('notesInp',  t.notes || '');
+  set('whyInp',    t.why || '');
+  set('lessonInp', t.lesson || '');
+  set('emotionInp', t.emotion || '');
+  set('patternInp', t.pattern || '');
+  set('candleInp',  t.candle || '');
+
+  setOutcome(t.outcome==='BE' ? 'BE' : (t.outcome || 'Win'));
+  setSrcByName(t.source || 'Fakes Trade');
+
+  selMood = t.mood || '😤';
+  document.querySelectorAll('.mood-btn').forEach(b=>b.classList.toggle('active', b.dataset.mood===selMood));
+
+  // Restore psych chips
+  const tags = Array.isArray(t.psychTags) ? t.psychTags : [];
+  document.querySelectorAll('.psych-chip').forEach(ch=>{
+    ch.classList.toggle('active', tags.includes(ch.dataset.tag));
+  });
+
+  // Restore legs (preserve auto-import flag, strike, expiry, cost basis)
+  if(t.legs && t.legs.length){
+    legs = t.legs.map(l=>({
+      price: l.price ?? l.costBasis ?? '',
+      size:  l.size  ?? 1,
+      strike: l.strike ?? '',
+      expiry: l.expiry ?? '',
+      costBasis: l.costBasis ?? l.price ?? '',
+      time: l.time ?? '',
+      autoImported: !!(l.autoImported || t.source==='Robinhood')
+    }));
+  } else {
+    legs = [{
+      price: t.entry || '',
+      size:  t.size  || 1,
+      strike: t.strike || '',
+      expiry: t.expiry || '',
+      costBasis: t.entry || '',
+      autoImported: t.source==='Robinhood'
+    }];
   }
+  renderLegs();
+
+  // Chart preview
+  chartImgData = t.chartImage || null;
+  const preview = document.getElementById('chartPreview');
+  const label   = document.getElementById('chartLabel');
+  const scanBtn = document.getElementById('aiScanBtn');
+  if(chartImgData){
+    preview.src = chartImgData;
+    preview.classList.add('show');
+    label.style.display = 'none';
+    scanBtn.style.display = 'flex';
+  } else {
+    preview.classList.remove('show');
+    preview.src = '';
+    label.style.display = '';
+    scanBtn.style.display = 'none';
+  }
+
   document.getElementById('addModalTitle').textContent = '✎ Edit Trade';
   document.getElementById('addModal').classList.add('open');
 }
@@ -1146,10 +1511,19 @@ function delTrade(id){
 }
 
 /* ─── MULTI-LEG LOGIC ─── */
-let legs = []; // [{price, size}]
+/* Each leg: { price, size, strike, expiry, costBasis, time, autoImported } */
+let legs = [];
 
-function addLeg(price='', size=''){
-  legs.push({price, size});
+function addLeg(price='', size='', extra={}){
+  legs.push({
+    price: price||'',
+    size: size||'',
+    strike: extra.strike||'',
+    expiry: extra.expiry||'',
+    costBasis: extra.costBasis||'',
+    time: extra.time||'',
+    autoImported: !!extra.autoImported
+  });
   renderLegs();
 }
 
@@ -1160,24 +1534,46 @@ function removeLeg(i){
 
 function renderLegs(){
   const container = document.getElementById('legsContainer');
-  container.innerHTML = legs.map((leg,i)=>`
-    <div class="leg-row">
-      <div>
-        <div class="leg-num">Leg ${i+1}</div>
-        <div class="leg-label">Entry Price $</div>
-        <input type="number" placeholder="0.00" step="0.01" inputmode="decimal"
-          value="${leg.price||''}"
-          oninput="legs[${i}].price=parseFloat(this.value)||0;recalcLegs()"/>
+  container.innerHTML = legs.map((leg,i)=>{
+    const auto = leg.autoImported ? 'auto-imported' : '';
+    const hint = leg.autoImported
+      ? `<div class="override-hint">⚠ Auto-imported from Robinhood — feel free to overwrite any field below.</div>`
+      : '';
+    return `
+    <div class="leg-row expanded ${auto}">
+      <div class="leg-head">
+        <div class="leg-head-title">Leg ${i+1}</div>
+        <button class="leg-del" onclick="removeLeg(${i})" title="Remove leg">✕</button>
       </div>
-      <div>
-        <div class="leg-num">&nbsp;</div>
-        <div class="leg-label">Contracts</div>
-        <input type="number" placeholder="1" step="1" inputmode="decimal"
-          value="${leg.size||''}"
-          oninput="legs[${i}].size=parseFloat(this.value)||0;recalcLegs()"/>
+      <div class="leg-grid">
+        <div class="leg-field">
+          <div class="leg-field-label">Strike $</div>
+          <input type="number" step="0.5" inputmode="decimal" placeholder="—"
+            value="${leg.strike||''}"
+            oninput="legs[${i}].strike=this.value;recalcLegs()"/>
+        </div>
+        <div class="leg-field">
+          <div class="leg-field-label">Expiry</div>
+          <input type="date" placeholder="—"
+            value="${leg.expiry||''}"
+            oninput="legs[${i}].expiry=this.value"/>
+        </div>
+        <div class="leg-field">
+          <div class="leg-field-label">Cost Basis $</div>
+          <input type="number" step="0.01" inputmode="decimal" placeholder="0.00"
+            value="${leg.costBasis||leg.price||''}"
+            oninput="legs[${i}].costBasis=parseFloat(this.value)||0;legs[${i}].price=legs[${i}].costBasis;recalcLegs()"/>
+        </div>
+        <div class="leg-field">
+          <div class="leg-field-label">Contracts</div>
+          <input type="number" step="1" inputmode="decimal" placeholder="1"
+            value="${leg.size||''}"
+            oninput="legs[${i}].size=parseFloat(this.value)||0;recalcLegs()"/>
+        </div>
       </div>
-      <button class="leg-del" onclick="removeLeg(${i})" title="Remove leg">✕</button>
-    </div>`).join('');
+      ${hint}
+    </div>`;
+  }).join('');
   recalcLegs();
 }
 
@@ -1185,8 +1581,11 @@ function recalcLegs(){
   const summary = document.getElementById('legsSummary');
   if(legs.length === 0){ summary.style.display='none'; return; }
   summary.style.display='block';
-  const totalContracts = legs.reduce((s,l)=>s+(l.size||0),0);
-  const weightedSum = legs.reduce((s,l)=>s+((l.price||0)*(l.size||0)),0);
+  const totalContracts = legs.reduce((s,l)=>s+(parseFloat(l.size)||0),0);
+  const weightedSum = legs.reduce((s,l)=>{
+    const p = parseFloat(l.costBasis) || parseFloat(l.price) || 0;
+    return s + (p * (parseFloat(l.size)||0));
+  },0);
   const avgEntry = totalContracts>0 ? weightedSum/totalContracts : 0;
   const exitPrice = parseFloat(document.getElementById('exitInp').value)||0;
   const type = document.getElementById('typeInp').value;
@@ -1212,9 +1611,12 @@ function openAdd(){
   editingId = null; chartImgData = null; legs = [];
   document.getElementById('addModalTitle').textContent = '📝 Log Trade';
   document.getElementById('addModal').classList.add('open');
+  document.getElementById('tickerInp').value = '';
   document.getElementById('dateInp').value = new Date().toISOString().split('T')[0];
   setOutcome('Win'); setSrcByName('Fakes Trade');
-  ['exitInp','pnlInp','notesInp','whyInp','lessonInp'].forEach(id=>document.getElementById(id).value='');
+  ['exitInp','pnlInp','notesInp','whyInp','lessonInp','emotionInp'].forEach(id=>{
+    const el=document.getElementById(id); if(el) el.value='';
+  });
   document.getElementById('patternInp').value='';
   document.getElementById('candleInp').value='';
   document.getElementById('typeInp').value='Call';
@@ -1226,7 +1628,16 @@ function openAdd(){
   document.getElementById('aiScanResult').innerHTML='';
   selMood='😤';
   document.querySelectorAll('.mood-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
+  document.querySelectorAll('.psych-chip').forEach(ch=>ch.classList.remove('active'));
   addLeg(); // start with one leg by default
+}
+
+/* Psych-tag chip toggle */
+function togglePsych(el){
+  el.classList.toggle('active');
+}
+function getSelectedPsych(){
+  return Array.from(document.querySelectorAll('.psych-chip.active')).map(el=>el.dataset.tag);
 }
 function closeAdd(){ document.getElementById('addModal').classList.remove('open'); }
 
@@ -1287,14 +1698,28 @@ function saveTrade(){
   const notes = document.getElementById('notesInp').value.trim();
   const why = document.getElementById('whyInp').value.trim();
   const lesson = document.getElementById('lessonInp').value.trim();
+  const emotion = (document.getElementById('emotionInp')?.value||'').trim();
+  const psychTags = getSelectedPsych();
   const pattern = document.getElementById('patternInp').value;
   const candle = document.getElementById('candleInp').value;
   if(!ticker){alert('Enter a ticker.');return;}
   if(!date){alert('Pick a date.');return;}
   if(legs.length===0){alert('Add at least one entry leg.');return;}
 
-  // Calculate from legs
-  const validLegs = legs.filter(l=>l.price>0);
+  // Calculate from legs — use costBasis if set, else price
+  const normalizedLegs = legs.map(l=>{
+    const price = parseFloat(l.costBasis) || parseFloat(l.price) || 0;
+    return {
+      price,
+      size: parseFloat(l.size) || 1,
+      strike: l.strike || '',
+      expiry: l.expiry || '',
+      costBasis: parseFloat(l.costBasis) || price || 0,
+      time: l.time || '',
+      autoImported: !!l.autoImported
+    };
+  });
+  const validLegs = normalizedLegs.filter(l=>l.price>0);
   const totalContracts = validLegs.reduce((s,l)=>s+(l.size||1),0);
   const weightedSum = validLegs.reduce((s,l)=>s+(l.price*(l.size||1)),0);
   const avgEntry = totalContracts>0?weightedSum/totalContracts:0;
@@ -1311,14 +1736,19 @@ function saveTrade(){
   }
   const d=getData();
   const stored_ai = editingId?(d.find(r=>r.id===editingId)||{}).aiAnalysis:null;
+  // Surface the most common strike/expiry to the top-level record for quick access
+  const topStrike = (validLegs.find(l=>l.strike)||{}).strike || '';
+  const topExpiry = (validLegs.find(l=>l.expiry)||{}).expiry || '';
   const record={
     id:editingId||Date.now().toString(),
     ticker,date,type,
     entry:avgEntry,  // avg entry for display
     exit,
     size:totalContracts,
-    legs:[...validLegs], // store all legs
-    pnl,outcome,source:selSrc,notes,why,lesson,pattern,candle,
+    legs:[...validLegs], // store all legs (with strike/expiry/costBasis)
+    strike: topStrike,
+    expiry: topExpiry,
+    pnl,outcome,source:selSrc,notes,why,lesson,emotion,psychTags,pattern,candle,
     mood:selMood,chartImage:chartImgData||null,aiAnalysis:stored_ai||null
   };
   if(editingId){
@@ -1342,7 +1772,10 @@ async function scanChartWithAI(){
   resultBox.className = 'ai-result-box';
   const ticker = document.getElementById('tickerInp').value||'';
   const type = document.getElementById('typeInp').value;
-  const entry = document.getElementById('entryInp').value;
+  // Use weighted avg from current legs as the "entry" for AI context
+  const _tc = legs.reduce((s,l)=>s+(parseFloat(l.size)||0),0);
+  const _ws = legs.reduce((s,l)=>s+(((parseFloat(l.costBasis)||parseFloat(l.price)||0))*(parseFloat(l.size)||0)),0);
+  const entry = _tc>0 ? (_ws/_tc).toFixed(2) : '';
   const exit = document.getElementById('exitInp').value;
   try {
     const resp = await fetch('/api/analyze-chart',{
