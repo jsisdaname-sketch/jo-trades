@@ -269,12 +269,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .chart-zone-label .txt{font-family:var(--mono);font-size:10px;color:var(--muted2);}
 .chart-preview{width:100%;max-height:180px;object-fit:contain;border-radius:6px;display:none;padding:6px;}
 .chart-preview.show{display:block;}
-.ai-scan-btn{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;font-family:var(--mono);font-size:11px;padding:9px;border-radius:8px;border:1px solid rgba(45,212,191,.4);background:rgba(45,212,191,.07);color:var(--teal);cursor:pointer;transition:all .2s;margin-top:8px;letter-spacing:.5px;}
-.ai-scan-btn:hover{background:rgba(45,212,191,.15);}
-.ai-scan-btn:disabled{opacity:.4;cursor:not-allowed;}
-.ai-result-box{margin-top:8px;padding:12px;border-radius:8px;background:rgba(45,212,191,.06);border:1px solid rgba(45,212,191,.2);font-size:12px;line-height:1.8;color:var(--text);display:none;}
-.ai-result-box.show{display:block;}
-.ai-result-box h4{font-family:var(--mono);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--teal);margin-bottom:6px;}
 
 /* ── SAVE BUTTON ── */
 .save-btn{width:100%;background:linear-gradient(135deg,var(--green),var(--teal));color:#000;border:none;border-radius:10px;padding:14px;font-family:var(--head);font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-top:6px;transition:opacity .2s;}
@@ -878,10 +872,6 @@ body{
         </div>
         <img id="chartPreview" class="chart-preview"/>
       </div>
-      <button class="ai-scan-btn" id="aiScanBtn" onclick="scanChartWithAI()" style="display:none">
-        🤖 AI Scan Chart — Identify Pattern &amp; Candle
-      </button>
-      <div class="ai-result-box" id="aiScanResult"></div>
     </div>
 
     <button class="save-btn" onclick="saveTrade()">SAVE TRADE</button>
@@ -1614,17 +1604,14 @@ function editFromDetail(){
   chartImgData = t.chartImage || null;
   const preview = document.getElementById('chartPreview');
   const label   = document.getElementById('chartLabel');
-  const scanBtn = document.getElementById('aiScanBtn');
   if(chartImgData){
     preview.src = chartImgData;
     preview.classList.add('show');
     label.style.display = 'none';
-    scanBtn.style.display = 'flex';
   } else {
     preview.classList.remove('show');
     preview.src = '';
     label.style.display = '';
-    scanBtn.style.display = 'none';
   }
 
   document.getElementById('addModalTitle').textContent = '✎ Edit Trade';
@@ -1754,9 +1741,6 @@ function openAdd(){
   document.getElementById('chartPreview').classList.remove('show');
   document.getElementById('chartPreview').src='';
   document.getElementById('chartLabel').style.display='';
-  document.getElementById('aiScanBtn').style.display='none';
-  document.getElementById('aiScanResult').className='ai-result-box';
-  document.getElementById('aiScanResult').innerHTML='';
   selMood='😤';
   document.querySelectorAll('.mood-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   document.querySelectorAll('.psych-chip').forEach(ch=>ch.classList.remove('active'));
@@ -1800,9 +1784,6 @@ function handleChart(e){
     document.getElementById('chartPreview').src = d;
     document.getElementById('chartPreview').classList.add('show');
     document.getElementById('chartLabel').style.display = 'none';
-    document.getElementById('aiScanBtn').style.display = 'flex';
-    document.getElementById('aiScanResult').className='ai-result-box';
-    document.getElementById('aiScanResult').innerHTML='';
   });
   reader.readAsDataURL(f);
 }
@@ -1892,47 +1873,6 @@ function saveTrade(){
     d.push(record);
   }
   saveAll(d); closeAdd(); renderAll();
-}
-
-/* ─── AI CHART SCAN ─── */
-async function scanChartWithAI(){
-  if(!chartImgData){ alert('Upload a chart screenshot first.'); return; }
-  const btn = document.getElementById('aiScanBtn');
-  const resultBox = document.getElementById('aiScanResult');
-  btn.disabled = true;
-  btn.innerHTML = '⏳ Scanning chart…';
-  resultBox.innerHTML = '';
-  resultBox.className = 'ai-result-box';
-  const ticker = document.getElementById('tickerInp').value||'';
-  const type = document.getElementById('typeInp').value;
-  // Use weighted avg from current legs as the "entry" for AI context
-  const _tc = legs.reduce((s,l)=>s+(parseFloat(l.size)||0),0);
-  const _ws = legs.reduce((s,l)=>s+(((parseFloat(l.costBasis)||parseFloat(l.price)||0))*(parseFloat(l.size)||0)),0);
-  const entry = _tc>0 ? (_ws/_tc).toFixed(2) : '';
-  const exit = document.getElementById('exitInp').value;
-  try {
-    const resp = await fetch('/api/analyze-chart',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        image: chartImgData,
-        tradeData:{ticker,type,entry,exit}
-      })
-    });
-    const data = await resp.json();
-    if(!resp.ok||data.error) throw new Error(data.error||'AI scan failed');
-    // Auto-fill pattern/candle if detected
-    const text = data.analysis||'';
-    resultBox.innerHTML = `<h4>🤖 AI Chart Analysis</h4>${formatAIText(text)}`;
-    resultBox.classList.add('show');
-    // Store analysis in aiScanResult for saving with trade
-    resultBox.dataset.analysis = text;
-  } catch(err){
-    resultBox.innerHTML = `<h4>⚠ Could not scan</h4><p style="color:var(--muted2);font-size:11px">${err.message||'Check that ANTHROPIC_API_KEY is set in your Netlify environment variables.'}</p>`;
-    resultBox.classList.add('show');
-  }
-  btn.disabled = false;
-  btn.innerHTML = '🤖 AI Scan Chart — Identify Pattern &amp; Candle';
 }
 
 /* ─── AI JOURNAL REVIEW ─── */
