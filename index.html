@@ -165,6 +165,26 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .danger-btn{background:rgba(255,82,82,.07);border:1px solid rgba(255,82,82,.35);border-radius:9px;padding:10px 14px;font-family:var(--mono);font-size:11px;color:var(--red);cursor:pointer;width:100%;text-align:left;}
 .empty{text-align:center;padding:40px 16px;font-family:var(--mono);font-size:11px;color:var(--muted);}
 .empty-i{font-size:30px;margin-bottom:10px;}
+.eti-hero{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:22px 18px;text-align:center;margin-bottom:4px;}
+.eti-big{font-family:var(--mono);font-size:46px;font-weight:700;line-height:1;letter-spacing:-2px;}
+.eti-verdict{font-family:var(--mono);font-size:11px;margin-top:10px;line-height:1.5;}
+.eti-gauge{height:10px;background:var(--s3);border-radius:5px;margin-top:18px;position:relative;overflow:hidden;}
+.eti-gauge-fill{height:100%;border-radius:5px;transition:width .4s ease,background .3s;}
+.eti-gauge-mark{position:absolute;top:0;width:1px;height:100%;background:rgba(255,255,255,.25);}
+.eti-gauge-scale{display:flex;justify-content:space-between;font-family:var(--mono);font-size:8px;color:var(--muted);margin-top:5px;}
+.eti-calc{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:15px;}
+.eti-inrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;}
+.eti-inrow:last-of-type{margin-bottom:0;}
+.eti-inrow label{font-family:var(--mono);font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--muted2);}
+.eti-inwrap{display:flex;align-items:center;gap:4px;background:var(--s2);border:1px solid var(--border);border-radius:9px;padding:0 12px;transition:border-color .2s;max-width:170px;flex:1;}
+.eti-inwrap:focus-within{border-color:var(--green);}
+.eti-inwrap span{font-family:var(--mono);font-size:13px;color:var(--muted2);}
+.eti-inwrap input{flex:1;width:100%;background:none;border:none;outline:none;color:var(--text);font-family:var(--mono);font-size:15px;padding:11px 0;text-align:right;-webkit-appearance:none;appearance:none;}
+.eti-inwrap input::-webkit-outer-spin-button,.eti-inwrap input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.eti-reset{margin-top:14px;width:100%;background:var(--s3);border:1px solid var(--border);border-radius:9px;padding:10px;font-family:var(--mono);font-size:10px;color:var(--muted2);cursor:pointer;letter-spacing:.5px;}
+.eti-reset:hover{border-color:var(--green);color:var(--text);}
+.eti-advice{font-size:13px;line-height:1.6;margin-top:6px;}
+.eti-note{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;margin-top:16px;text-align:center;}
 </style>
 </head>
 <body>
@@ -221,6 +241,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="snav-btn active" onclick="switchReport('cashflow')">Cash Flow</div>
       <div class="snav-btn" onclick="switchReport('spending')">Spending</div>
       <div class="snav-btn" onclick="switchReport('income')">Income</div>
+      <div class="snav-btn" onclick="switchReport('eti')">E/I Ratio</div>
       <div class="snav-btn" onclick="switchReport('insights')">&#129504; AI Insights</div>
     </div>
 
@@ -250,6 +271,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="sec-lbl">Income Sources</div>
       <div id="incCats"></div>
     </div>
+
+    <div id="rpt-eti" style="display:none"></div>
 
     <div id="rpt-insights" style="display:none">
       <div class="sec-lbl">AI Insights &middot; This Month</div>
@@ -451,8 +474,8 @@ function switchTab(t) {
 }
 function switchReport(r) {
   activeReport = r;
-  document.querySelectorAll('.snav-btn').forEach((el, i) => el.classList.toggle('active', ['cashflow','spending','income','insights'][i] === r));
-  ['cashflow','spending','income','insights'].forEach(id => document.getElementById('rpt-'+id).style.display = id === r ? '' : 'none');
+  document.querySelectorAll('.snav-btn').forEach((el, i) => el.classList.toggle('active', ['cashflow','spending','income','eti','insights'][i] === r));
+  ['cashflow','spending','income','eti','insights'].forEach(id => document.getElementById('rpt-'+id).style.display = id === r ? '' : 'none');
   renderAll();
 }
 
@@ -463,6 +486,7 @@ function renderAll() {
     if (activeReport === 'cashflow') renderCashFlow(data);
     if (activeReport === 'spending') renderSpending(data);
     if (activeReport === 'income') renderIncome(data);
+    if (activeReport === 'eti') renderETI(data);
     if (activeReport === 'insights') renderInsights(data);
   }
   if (activeTab === 'transactions') renderTxList(data);
@@ -696,6 +720,101 @@ function renderIncome(data) {
         <span style="color:var(--muted)">TOTAL INCOME</span>
         <span style="color:var(--green);font-weight:700">$${total.toFixed(2)}</span>
       </div>`;
+}
+
+let etiActuals = { inc: 0, exp: 0 };
+
+function renderETI(data) {
+  const inc = data.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+  const exp = data.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  etiActuals = { inc, exp };
+
+  document.getElementById('rpt-eti').innerHTML = `
+    <div class="sec-lbl">Expense-to-Income Ratio &middot; ${document.getElementById('monthLabel').textContent}</div>
+    <div class="eti-hero">
+      <div class="eti-big" id="eti-ratio">&mdash;</div>
+      <div class="eti-verdict" id="eti-verdict">&mdash;</div>
+      <div class="eti-gauge">
+        <div class="eti-gauge-fill" id="eti-gaugefill" style="width:0%"></div>
+        <div class="eti-gauge-mark" style="left:50%"></div>
+        <div class="eti-gauge-mark" style="left:70%"></div>
+        <div class="eti-gauge-mark" style="left:100%"></div>
+      </div>
+      <div class="eti-gauge-scale"><span>0%</span><span>50%</span><span>70%</span><span>100%+</span></div>
+    </div>
+    <div class="sec-lbl" style="margin-top:20px">Calculator <span style="color:var(--muted2);text-transform:none;letter-spacing:0">&middot; edit to run what-ifs</span></div>
+    <div class="eti-calc">
+      <div class="eti-inrow">
+        <label>Monthly Income</label>
+        <div class="eti-inwrap"><span>$</span><input type="number" inputmode="decimal" id="eti-inc" oninput="etiUpdate()" placeholder="0"></div>
+      </div>
+      <div class="eti-inrow">
+        <label>Monthly Expenses</label>
+        <div class="eti-inwrap"><span>$</span><input type="number" inputmode="decimal" id="eti-exp" oninput="etiUpdate()" placeholder="0"></div>
+      </div>
+      <button class="eti-reset" onclick="etiReset()">&#8635; Reset to this month's actuals</button>
+    </div>
+    <div class="sec-lbl" style="margin-top:20px">Target</div>
+    <div class="eti-calc">
+      <div class="eti-inrow">
+        <label>Goal Ratio</label>
+        <div class="eti-inwrap"><input type="number" inputmode="decimal" id="eti-target" value="70" oninput="etiUpdate()"><span>%</span></div>
+      </div>
+      <div id="eti-advice" class="eti-advice"></div>
+    </div>
+    <div class="eti-note">Lower is better. Below 100% means you kept some of what you earned; above 100% means you spent more than you made this month.</div>
+  `;
+
+  document.getElementById('eti-inc').value = inc ? inc.toFixed(2) : '';
+  document.getElementById('eti-exp').value = exp ? exp.toFixed(2) : '';
+  etiUpdate();
+}
+
+function etiUpdate() {
+  const inc = parseFloat(document.getElementById('eti-inc').value) || 0;
+  const exp = parseFloat(document.getElementById('eti-exp').value) || 0;
+  const ratio = inc > 0 ? (exp / inc * 100) : (exp > 0 ? Infinity : 0);
+
+  let color, label;
+  if (inc <= 0 && exp <= 0) { color = 'var(--muted2)'; label = 'Enter income and expenses to start'; }
+  else if (inc <= 0) { color = 'var(--red)'; label = 'No income \u2014 ratio is off the charts'; }
+  else if (ratio <= 50) { color = 'var(--green)'; label = 'Excellent \u2014 spending under half your income'; }
+  else if (ratio <= 70) { color = 'var(--green)'; label = 'Healthy \u2014 solid savings cushion'; }
+  else if (ratio <= 85) { color = 'var(--yellow)'; label = 'Okay \u2014 some room to tighten up'; }
+  else if (ratio <= 100) { color = 'var(--yellow)'; label = 'Tight \u2014 almost nothing left over'; }
+  else { color = 'var(--red)'; label = 'Deficit \u2014 spending more than you earn'; }
+
+  const rEl = document.getElementById('eti-ratio');
+  rEl.textContent = inc <= 0 ? (exp > 0 ? '\u221e' : '\u2014') : ratio.toFixed(1) + '%';
+  rEl.style.color = color;
+  const vEl = document.getElementById('eti-verdict');
+  vEl.textContent = label;
+  vEl.style.color = color;
+
+  const gEl = document.getElementById('eti-gaugefill');
+  gEl.style.width = Math.min(100, isFinite(ratio) ? ratio : 100) + '%';
+  gEl.style.background = color;
+
+  const target = parseFloat(document.getElementById('eti-target').value) || 0;
+  const adv = document.getElementById('eti-advice');
+  if (inc > 0 && target > 0) {
+    const maxExp = inc * target / 100;
+    const diff = exp - maxExp;
+    if (diff <= 0) {
+      adv.innerHTML = `<span style="color:var(--green)">&#10003; Already at or below ${target}%.</span> You have <b>$${Math.abs(diff).toFixed(2)}</b> of expense headroom before crossing it.`;
+    } else {
+      const incNeeded = exp / (target / 100) - inc;
+      adv.innerHTML = `To hit <b>${target}%</b>: cut expenses by <b style="color:var(--red)">$${diff.toFixed(2)}</b> <span style="color:var(--muted)">or</span> add <b style="color:var(--green)">$${incNeeded.toFixed(2)}</b> income.`;
+    }
+  } else {
+    adv.innerHTML = '<span style="color:var(--muted)">Enter income and a goal ratio to see what it takes.</span>';
+  }
+}
+
+function etiReset() {
+  document.getElementById('eti-inc').value = etiActuals.inc ? etiActuals.inc.toFixed(2) : '';
+  document.getElementById('eti-exp').value = etiActuals.exp ? etiActuals.exp.toFixed(2) : '';
+  etiUpdate();
 }
 
 function renderInsights(data) {
