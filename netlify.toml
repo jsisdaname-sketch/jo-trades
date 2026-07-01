@@ -13,6 +13,11 @@
   status = 200
 
 [[redirects]]
+  from = "/backups"
+  to = "/backups.html"
+  status = 200
+
+[[redirects]]
   from = "/api/get-trades"
   to = "/.netlify/functions/get-trades"
   status = 200
