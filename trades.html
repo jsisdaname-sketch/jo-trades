@@ -59,6 +59,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tabs::-webkit-scrollbar{display:none;}
 .tab{flex:1;padding:11px 4px;text-align:center;font-family:var(--mono);font-size:10px;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);cursor:pointer;border-bottom:2px solid transparent;transition:all .2s;white-space:nowrap;min-width:60px;}
 .tab.active{color:var(--green);border-bottom-color:var(--green);}
+.tab.tab-wb{flex:0 0 auto;min-width:0;padding:11px 12px;color:rgba(47,128,255,.55);}
+.tab.tab-wb.active{color:#2f80ff;border-bottom-color:#2f80ff;}
 .sync-bar{display:flex;align-items:center;gap:8px;padding:5px 16px;background:var(--s1);border-bottom:1px solid var(--border);}
 .sync-status{font-family:var(--mono);font-size:10px;color:var(--muted2);flex:1;}
 .sync-btn{font-size:10px;padding:3px 10px;border-radius:5px;border:1px solid var(--border);background:var(--s3);color:var(--text);cursor:pointer;font-family:var(--mono);transition:border-color .15s;}
@@ -576,6 +578,7 @@ body{
 
   <div class="tabs">
     <div class="tab active" onclick="switchTab('dashboard')">Dashboard</div>
+    <div class="tab tab-wb" onclick="switchTab('webull')">&#9679; Webull</div>
     <div class="tab" onclick="switchTab('calendar')">Calendar</div>
     <div class="tab" onclick="switchTab('trades')">Trades</div>
     <div class="tab" onclick="switchTab('gallery')">Gallery</div>
@@ -591,6 +594,7 @@ body{
 
   <!-- DASHBOARD -->
   <div class="view on" id="tab-dashboard">
+    <div class="sec" id="dashOwner"></div>
     <div id="motiveBanner"></div>
     <div class="stats-row" style="grid-template-columns:repeat(3,1fr)">
       <div class="scard"><div class="scard-val" id="d-pnl">$0</div><div class="scard-lbl">Net P&amp;L</div></div>
@@ -1126,9 +1130,10 @@ function setMonthLabel(){
 
 function switchTab(t){
   activeTab = t;
-  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['dashboard','calendar','trades','gallery','journal','analytics'][i]===t));
+  document.querySelectorAll('.tab').forEach((el,i)=>el.classList.toggle('active',['dashboard','webull','calendar','trades','gallery','journal','analytics'][i]===t));
   document.querySelectorAll('.view').forEach(el=>el.classList.remove('on'));
-  document.getElementById('tab-'+t).classList.add('on');
+  // The Webull tab reuses the dashboard view, just with different data
+  document.getElementById('tab-'+(t==='webull'?'dashboard':t)).classList.add('on');
   renderAll();
 }
 
@@ -1140,7 +1145,8 @@ function setFilter(f){
 
 function renderAll(){
   const data = getMonthData();
-  if(activeTab==='dashboard') renderDashboard(data);
+  if(activeTab==='dashboard') renderDashboard(data.filter(t=>t.source!=='Webull'),'mine');
+  if(activeTab==='webull') renderDashboard(data.filter(t=>t.source==='Webull'),'webull');
   if(activeTab==='calendar') renderCalendar(data);
   if(activeTab==='trades') renderTrades(data);
   if(activeTab==='gallery') renderGallery(data);
@@ -1163,8 +1169,16 @@ function calcStats(data){
 }
 
 /* ─── DASHBOARD ─── */
-function renderDashboard(data){
+function renderDashboard(data,who){
   const s = calcStats(data);
+
+  // Which account this dashboard is showing
+  const ownerEl = document.getElementById('dashOwner');
+  if(ownerEl){
+    ownerEl.innerHTML = who==='webull'
+      ? '<span style="color:#2f80ff">&#9679; Dad\'s Account &mdash; Webull</span>'
+      : '<span style="color:#00c805">&#9679; My Trades &mdash; Robinhood &amp; Manual</span>';
+  }
 
   // Motivational banner
   const banner = document.getElementById('motiveBanner');
