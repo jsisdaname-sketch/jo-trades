@@ -237,10 +237,32 @@
     `).join('');
   }
 
-  function importTrades() {
-    // Read existing trades from the CORRECT key
-    let existing = [];
-    try { existing = JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]'); } catch(e) {}
+  async function importTrades() {
+    document.querySelector('#import-section .btn').disabled = true;
+
+    // SAFE MERGE: pull the cloud copy FIRST so we can never overwrite
+    // trades that only exist in the cloud (e.g. saved from another session).
+    let cloud = [];
+    try {
+      const r = await fetch('/api/get-trades');
+      const d = await r.json();
+      cloud = Array.isArray(d.trades) ? d.trades : [];
+    } catch(e) {}
+
+    let local = [];
+    try { local = JSON.parse(localStorage.getItem(JOURNAL_KEY) || '[]'); } catch(e) {}
+
+    // Union cloud + local by id, keeping the richer copy of each trade
+    const byId = {};
+    const noId = [];
+    const add = t => {
+      if(!t) return;
+      if(!t.id){ noId.push(t); return; }
+      const cur = byId[t.id];
+      if(!cur || JSON.stringify(t).length > JSON.stringify(cur).length) byId[t.id] = t;
+    };
+    cloud.forEach(add); local.forEach(add);
+    const existing = [...Object.values(byId), ...noId];
 
     const existingIds = new Set(existing.map(t => t.id));
 
@@ -276,7 +298,6 @@
     const note = document.getElementById('import-note');
     note.textContent = `✓ ${newTrades.length} new trades imported! ${fetchedTrades.length - newTrades.length} duplicates skipped. Redirecting to journal…`;
     note.className = 'alert show success';
-    document.querySelector('#import-section .btn').disabled = true;
 
     setTimeout(() => { window.location.href = '/trades'; }, 2000);
   }
