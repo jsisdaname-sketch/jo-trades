@@ -1098,9 +1098,22 @@ async function cloudPull(silent){
     if(!r.ok) throw new Error();
     const data = await r.json();
     if(data.trades && data.trades.length > 0){
-      localStorage.setItem(SK, JSON.stringify(data.trades));
+      // SAFE MERGE: combine cloud + local by id, keeping the richer copy of each trade.
+      // Pull can never delete anything anymore.
+      const local = getData();
+      const byId = {};
+      const noId = [];
+      const add = t => {
+        if(!t) return;
+        if(!t.id){ noId.push(t); return; }
+        const cur = byId[t.id];
+        if(!cur || JSON.stringify(t).length > JSON.stringify(cur).length) byId[t.id] = t;
+      };
+      data.trades.forEach(add); local.forEach(add);
+      const merged = [...Object.values(byId), ...noId];
+      localStorage.setItem(SK, JSON.stringify(merged));
       renderAll();
-      if(!silent){ s.textContent = '✓ Pulled '+data.trades.length+' trades'; s.style.color = 'var(--green)'; }
+      if(!silent){ s.textContent = '✓ Merged: '+merged.length+' trades safe'; s.style.color = 'var(--green)'; }
     } else if(!silent){
       s.textContent = 'Cloud empty'; s.style.color = 'var(--muted2)';
     }
