@@ -1,6 +1,6 @@
 const { Snaptrade } = require('snaptrade-typescript-sdk');
 
-function calcPnl(orders) {
+function calcPnl(orders, sourceLabel, idPrefix) {
   const groups = {};
 
   for (const o of orders) {
@@ -63,7 +63,7 @@ function calcPnl(orders) {
     const date = g.firstBuyDate ? g.firstBuyDate.split('T')[0] : '';
 
     trades.push({
-      id: `rh_${key}_${date}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
+      id: `${idPrefix}_${key}_${date}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
       ticker: g.ticker,
       date,
       type: g.tradeType,
@@ -72,8 +72,8 @@ function calcPnl(orders) {
       qty: g.buyQty,
       pnl,
       outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
-      source: 'Robinhood',
-      notes: `Auto-synced from Robinhood. Bought ${g.buyQty} @ avg $${avgEntry}, Sold ${g.sellQty} @ avg $${avgExit}`,
+      source: sourceLabel,
+      notes: `Auto-synced from ${sourceLabel}. Bought ${g.buyQty} @ avg $${avgEntry}, Sold ${g.sellQty} @ avg $${avgExit}`,
       synced: true,
     });
   }
@@ -95,23 +95,45 @@ exports.handler = async (event) => {
     const userId = 'JOTRADES';
     const userSecret = process.env.SNAPTRADE_USER_SECRET;
 
+    // Which broker's accounts to pull from. Defaults to Robinhood.
+    // This is what keeps your Robinhood trades and dad's Webull trades separate.
+    let body = {};
+    try { body = JSON.parse(event.body || '{}'); } catch (e) {}
+    const broker = (body.broker || 'ROBINHOOD').toUpperCase();
+    const sourceLabel = broker === 'WEBULL' ? 'Webull' : 'Robinhood';
+    const idPrefix = broker === 'WEBULL' ? 'wb' : 'rh';
+
     const accountsRes = await snaptrade.accountInformation.listUserAccounts({ userId, userSecret });
     const accounts = accountsRes.data || [];
 
-    if (accounts.length === 0) {
-      return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades: [], message: 'No accounts found. Please connect Robinhood first.' }) };
+    // Only keep accounts belonging to the requested broker
+    const brokerAccounts = accounts.filter(a => {
+      const inst = (a.institution_name || '').toUpperCase();
+      return inst.includes(broker);
+    });
+
+    if (brokerAccounts.length === 0) {
+      return {
+        statusCode: 200,
+        headers: { 'Access-Control-Allow-Origin': '*' },
+        body: JSON.stringify({
+          trades: [],
+          message: `No ${sourceLabel} accounts found. Please connect ${sourceLabel} first.`,
+          connectedInstitutions: accounts.map(a => a.institution_name)
+        })
+      };
     }
 
     const allOrders = [];
-    for (const account of accounts) {
+    for (const account of brokerAccounts) {
       try {
         const ordersRes = await snaptrade.accountInformation.getUserAccountOrders({ userId, userSecret, accountId: account.id, state: 'all' });
         if (Array.isArray(ordersRes.data)) allOrders.push(...ordersRes.data);
       } catch(e) {}
     }
 
-    const trades = calcPnl(allOrders);
-    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades, totalOrders: allOrders.length }) };
+    const trades = calcPnl(allOrders, sourceLabel, idPrefix);
+    return { statusCode: 200, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ trades, totalOrders: allOrders.length, accountsUsed: brokerAccounts.length }) };
 
   } catch(e) {
     return { statusCode: 500, headers: { 'Access-Control-Allow-Origin': '*' }, body: JSON.stringify({ error: e.message }) };
