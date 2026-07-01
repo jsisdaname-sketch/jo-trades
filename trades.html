@@ -212,6 +212,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .filter-row{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap;}
 .filter-pill{padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--s2);font-family:var(--mono);font-size:9px;cursor:pointer;color:var(--muted2);transition:all .15s;text-transform:uppercase;letter-spacing:.5px;}
 .filter-pill.active{background:var(--green);color:#000;border-color:var(--green);font-weight:700;}
+.acct-pill{padding:5px 12px;border-radius:16px;border:1px solid var(--border);background:var(--s2);font-family:var(--mono);font-size:9px;cursor:pointer;color:var(--muted2);transition:all .15s;text-transform:uppercase;letter-spacing:.5px;}
+.acct-pill.active-mine{background:#00c805;color:#000;border-color:#00c805;font-weight:700;}
+.acct-pill.active-wb{background:#2f80ff;color:#fff;border-color:#2f80ff;font-weight:700;}
 
 /* ── FAB ── */
 .fab{position:fixed;bottom:24px;right:16px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--teal));border:none;font-size:24px;color:#000;cursor:pointer;box-shadow:0 4px 24px rgba(57,217,138,.35);display:none;align-items:center;justify-content:center;z-index:30;transition:transform .15s;}
@@ -677,6 +680,10 @@ body{
   <!-- GALLERY -->
   <div class="view" id="tab-gallery">
     <div class="gallery-tip">💡 <strong>TradingView Tip:</strong> For the best visual setup, take your screenshot right at your entry — show at least 2 candles before and after. Then tap <strong>📍</strong> on any chart to drop Entry ↑ and Exit ↓ arrows exactly where you traded.</div>
+    <div class="filter-row" style="margin-bottom:8px">
+      <div class="acct-pill active-mine" id="gacct-mine" onclick="setGalleryAcct('mine')">&#9679; Mine</div>
+      <div class="acct-pill" id="gacct-wb" onclick="setGalleryAcct('webull')">&#9679; Dad's Webull</div>
+    </div>
     <div class="filter-row" id="galleryFilterRow">
       <div class="filter-pill active" onclick="setGalleryFilter('All')">All</div>
       <div class="filter-pill" onclick="setGalleryFilter('Win')">Wins ✅</div>
@@ -699,6 +706,9 @@ body{
       <div style="font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:2px;color:var(--muted)">Range:</div>
       <div class="filter-pill active" id="arange-month" onclick="setAnalyticsRange('month')">This Month</div>
       <div class="filter-pill" id="arange-all" onclick="setAnalyticsRange('all')">All Time</div>
+      <div style="width:1px;height:16px;background:var(--border)"></div>
+      <div class="acct-pill active-mine" id="aacct-mine" onclick="setAnalyticsAcct('mine')">&#9679; Mine</div>
+      <div class="acct-pill" id="aacct-wb" onclick="setAnalyticsAcct('webull')">&#9679; Dad's Webull</div>
     </div>
     <div class="analytics-card">
       <div class="sec" style="margin-bottom:12px">Detailed Stats</div>
@@ -1016,6 +1026,22 @@ let selSrc = "Fakes Trade", selOutcome = "Win", selMood = "😤";
 let editingId = null, detailId = null;
 let activeTab = "dashboard", tradeFilter = "All";
 let analyticsRange = "month";
+let galleryAcct = 'mine';
+let analyticsAcct = 'mine';
+// Split any trade list into my trades vs Dad's Webull trades
+function acctSplit(data,who){ return who==='webull' ? data.filter(t=>t.source==='Webull') : data.filter(t=>t.source!=='Webull'); }
+function setGalleryAcct(a){
+  galleryAcct=a;
+  document.getElementById('gacct-mine').className='acct-pill'+(a==='mine'?' active-mine':'');
+  document.getElementById('gacct-wb').className='acct-pill'+(a==='webull'?' active-wb':'');
+  renderGallery(acctSplit(getMonthData(),galleryAcct));
+}
+function setAnalyticsAcct(a){
+  analyticsAcct=a;
+  document.getElementById('aacct-mine').className='acct-pill'+(a==='mine'?' active-mine':'');
+  document.getElementById('aacct-wb').className='acct-pill'+(a==='webull'?' active-wb':'');
+  renderAnalytics();
+}
 let chartImgData = null;
 
 /* ─── AUTH ─── */
@@ -1149,7 +1175,7 @@ function renderAll(){
   if(activeTab==='webull') renderDashboard(data.filter(t=>t.source==='Webull'),'webull');
   if(activeTab==='calendar') renderCalendar(data);
   if(activeTab==='trades') renderTrades(data);
-  if(activeTab==='gallery') renderGallery(data);
+  if(activeTab==='gallery') renderGallery(acctSplit(data,galleryAcct));
   if(activeTab==='journal') renderJournal(data);
   if(activeTab==='analytics') renderAnalytics();
 }
@@ -1958,7 +1984,7 @@ function setAnalyticsRange(r){
   document.getElementById('arange-all').className='filter-pill'+(r==='all'?' active':'');
   renderAnalytics();
 }
-function getAnalyticsData(){ return analyticsRange==='month'?getMonthData():getData(); }
+function getAnalyticsData(){ const base = analyticsRange==='month'?getMonthData():getData(); return acctSplit(base,analyticsAcct); }
 
 function renderAnalytics(){
   const data = getAnalyticsData();
@@ -2245,7 +2271,7 @@ let galleryFilter = 'All';
 function setGalleryFilter(f){
   galleryFilter = f;
   document.querySelectorAll('#galleryFilterRow .filter-pill').forEach(el=>el.classList.toggle('active',el.textContent.trim().startsWith(f)||(f==='All'&&el.textContent.trim()==='All')));
-  renderGallery(getMonthData());
+  renderGallery(acctSplit(getMonthData(),galleryAcct));
 }
 
 function openTemplate(id){
