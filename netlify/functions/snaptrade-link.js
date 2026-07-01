@@ -14,12 +14,20 @@ exports.handler = async (event) => {
     const userId = 'JOTRADES';
     const userSecret = process.env.SNAPTRADE_USER_SECRET;
 
+    // Which broker to connect. Defaults to Robinhood so old behavior is unchanged.
+    let body = {};
+    try { body = JSON.parse(event.body || '{}'); } catch (e) {}
+    const broker = (body.broker || 'ROBINHOOD').toUpperCase();
+
+    // Send the user back to the right sync page after they log in
+    const redirectPage = broker === 'WEBULL' ? '/webull-sync' : '/robinhood-sync';
+
     const response = await snaptrade.authentication.loginSnapTradeUser({
       userId,
       userSecret,
-      broker: 'ROBINHOOD',
+      broker,
       immediateRedirect: true,
-      customRedirect: 'https://idyllic-druid-6826b0.netlify.app/robinhood-sync',
+      customRedirect: `https://idyllic-druid-6826b0.netlify.app${redirectPage}`,
     });
 
     const redirectURI = response.data?.redirectURI;
