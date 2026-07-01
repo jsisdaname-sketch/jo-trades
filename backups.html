@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JO Trades — Backups</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #39d98a; --red: #ff5c5c; --gold: #ffd166;
+    --bg: #07080a; --card: #0f1117; --border: #252830;
+    --text: #eef0f4; --muted: #4a4f5e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--bg); color:var(--text); font-family:'DM Sans',sans-serif; min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:32px 16px 64px; }
+  .back { align-self:flex-start; font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--muted); text-decoration:none; margin-bottom:32px; letter-spacing:1px; }
+  .back:hover { color:var(--green); }
+  .logo { font-family:'Syne',sans-serif; font-size:13px; font-weight:800; letter-spacing:3px; color:var(--muted); text-transform:uppercase; margin-bottom:8px; }
+  h1 { font-family:'Syne',sans-serif; font-size:clamp(28px,7vw,44px); font-weight:800; color:#fff; margin-bottom:8px; }
+  h1 span { color:var(--gold); }
+  .subtitle { font-family:'Share Tech Mono',monospace; font-size:12px; color:var(--muted); letter-spacing:2px; margin-bottom:32px; text-align:center; }
+  .card { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:22px; width:100%; max-width:640px; margin-bottom:14px; }
+  .card-title { font-family:'Share Tech Mono',monospace; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--muted); margin-bottom:14px; }
+  .live-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; }
+  .ls-item { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:10px; text-align:center; }
+  .ls-val { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; color:#fff; }
+  .ls-lbl { font-family:'Share Tech Mono',monospace; font-size:8px; color:var(--muted); letter-spacing:1px; margin-top:2px; text-transform:uppercase; }
+  .bk-row { background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:8px; display:flex; align-items:center; gap:12px; flex-wrap:wrap; }
+  .bk-when { font-family:'Share Tech Mono',monospace; font-size:12px; color:#fff; min-width:150px; }
+  .bk-stats { font-family:'Share Tech Mono',monospace; font-size:10px; color:var(--muted); flex:1; }
+  .bk-stats b { color:var(--gold); }
+  .bk-restore { padding:7px 14px; border-radius:7px; border:1px solid var(--border); background:transparent; color:var(--green); font-family:'Syne',sans-serif; font-size:12px; font-weight:700; cursor:pointer; }
+  .bk-restore:hover { border-color:var(--green); background:rgba(57,217,138,0.08); }
+  .bk-restore:disabled { opacity:.4; cursor:not-allowed; }
+  .pre-restore { border-color:rgba(255,209,102,.35); }
+  .alert { border-radius:8px; padding:12px 14px; font-size:13px; margin-bottom:12px; display:none; }
+  .alert.show { display:block; }
+  .alert.ok { background:rgba(57,217,138,0.08); border:1px solid rgba(57,217,138,0.25); color:var(--green); }
+  .alert.err { background:rgba(255,92,92,0.08); border:1px solid rgba(255,92,92,0.25); color:var(--red); }
+  .empty { text-align:center; color:var(--muted); font-family:'Share Tech Mono',monospace; font-size:12px; padding:24px 0; }
+</style>
+</head>
+<body>
+
+<a href="/trades" class="back">← Back to Journal</a>
+<div class="logo">JO Trades</div>
+<h1>Cloud <span>Backups</span></h1>
+<div class="subtitle">EVERY SAVE IS SNAPSHOTTED · RESTORE ANY POINT IN TIME</div>
+
+<div class="card">
+  <div class="card-title">Live Cloud Data — Right Now</div>
+  <div class="live-stats" id="liveStats"><div class="empty" style="grid-column:1/-1">Loading…</div></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Backup History (newest first)</div>
+  <div class="alert" id="alert"></div>
+  <div id="backupList"><div class="empty">Loading backups…</div></div>
+</div>
+
+<script>
+function fmtKey(key){
+  // backups/2026-07-01T18-30-00-123Z  or  backups/pre-restore-2026-...
+  const isPre = key.includes('pre-restore-');
+  const stamp = key.replace('backups/','').replace('pre-restore-','');
+  const iso = stamp.replace(/^(\d{4})-(\d{2})-(\d{2})T(\d{2})-(\d{2})-(\d{2})/, '$1-$2-$3T$4:$5:$6');
+  const d = new Date(iso);
+  const label = isNaN(d) ? stamp : d.toLocaleString('en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'});
+  return { label, isPre };
+}
+
+function statLine(s){
+  if(!s) return 'stats unavailable (older backup)';
+  return `<b>${s.count}</b> trades · <b>${s.withJournal}</b> journaled · <b>${s.withCharts}</b> charts · <b>${s.withAnnotations}</b> annotated`;
+}
+
+function showAlert(msg, ok){
+  const el = document.getElementById('alert');
+  el.textContent = msg;
+  el.className = 'alert show ' + (ok ? 'ok' : 'err');
+}
+
+async function load(){
+  try {
+    const r = await fetch('/.netlify/functions/backups');
+    const data = await r.json();
+
+    const ls = document.getElementById('liveStats');
+    if(data.live){
+      ls.innerHTML = `
+        <div class="ls-item"><div class="ls-val">${data.live.count}</div><div class="ls-lbl">Trades</div></div>
+        <div class="ls-item"><div class="ls-val">${data.live.withJournal}</div><div class="ls-lbl">Journaled</div></div>
+        <div class="ls-item"><div class="ls-val">${data.live.withCharts}</div><div class="ls-lbl">Charts</div></div>
+        <div class="ls-item"><div class="ls-val">${data.live.withAnnotations}</div><div class="ls-lbl">Annotated</div></div>`;
+    } else {
+      ls.innerHTML = '<div class="empty" style="grid-column:1/-1">Cloud is empty</div>';
+    }
+
+    const list = document.getElementById('backupList');
+    if(!data.backups || !data.backups.length){
+      list.innerHTML = '<div class="empty">No backups yet.<br>Backups are created automatically every time the journal saves.</div>';
+      return;
+    }
+    list.innerHTML = data.backups.map(b=>{
+      const f = fmtKey(b.key);
+      return `<div class="bk-row ${f.isPre?'pre-restore':''}">
+        <div class="bk-when">${f.isPre?'⏪ ':''}${f.label}</div>
+        <div class="bk-stats">${statLine(b.stats)}</div>
+        <button class="bk-restore" onclick="restore('${b.key}', this)">Restore</button>
+      </div>`;
+    }).join('');
+  } catch(e){
+    document.getElementById('backupList').innerHTML = '<div class="empty">Could not load backups: '+e.message+'</div>';
+  }
+}
+
+async function restore(key, btn){
+  const f = fmtKey(key);
+  if(!confirm(`Restore the cloud to the ${f.label} backup?\n\nDon't worry — the current cloud data gets its own backup first, so this is reversible.`)) return;
+  btn.disabled = true; btn.textContent = 'Restoring…';
+  try {
+    const r = await fetch('/.netlify/functions/backups', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ key })
+    });
+    const d = await r.json();
+    if(!r.ok || !d.ok) throw new Error(d.error||'Restore failed');
+    showAlert(`✓ Restored ${d.stats.count} trades (${d.stats.withJournal} journaled, ${d.stats.withCharts} charts). Now open the journal and press Pull to load it.`, true);
+    load();
+  } catch(e){
+    showAlert('Restore failed: '+e.message, false);
+    btn.disabled = false; btn.textContent = 'Restore';
+  }
+}
+
+load();
+</script>
+</body>
+</html>
