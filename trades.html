@@ -626,6 +626,7 @@ body{
       <span><span class="lg-dot" style="background:#c8d8ff"></span>News</span>
       <span><span class="lg-dot" style="background:#e8c6ff"></span>Personal</span>
     </div>
+    <div class="sec" style="margin-top:6px"><span style="color:#00c805">&#9679; My Trades &mdash; Robinhood &amp; Manual</span><span id="calMineTotal"></span></div>
     <div class="cal-section">
       <div class="cal-main">
         <div class="cal-wrap">
@@ -637,6 +638,19 @@ body{
         </div>
       </div>
       <div class="weekly-side" id="weeklySide"></div>
+    </div>
+    <div class="sec" style="margin-top:20px"><span style="color:#2f80ff">&#9679; Dad's Account &mdash; Webull</span><span id="calWbTotal"></span></div>
+    <div class="cal-section">
+      <div class="cal-main">
+        <div class="cal-wrap">
+          <div class="cal-header">
+            <div class="cal-dow">Sun</div><div class="cal-dow">Mon</div><div class="cal-dow">Tue</div>
+            <div class="cal-dow">Wed</div><div class="cal-dow">Thu</div><div class="cal-dow">Fri</div><div class="cal-dow">Sat</div>
+          </div>
+          <div class="cal-grid" id="calGridWb"></div>
+        </div>
+      </div>
+      <div class="weekly-side" id="weeklySideWb"></div>
     </div>
     <div class="sec" id="calDayLabel">Select a day</div>
     <div id="calDayTrades"></div>
@@ -1259,6 +1273,14 @@ function renderEquityCurve(sorted){
 
 /* ─── CALENDAR ─── */
 function renderCalendar(data){
+  // Split: everything that's mine (Robinhood + manual entries) vs Dad's Webull
+  const mine = data.filter(t=>t.source!=='Webull');
+  const dads = data.filter(t=>t.source==='Webull');
+  renderCalendarInto(mine,'calGrid','weeklySide','calMineTotal');
+  renderCalendarInto(dads,'calGridWb','weeklySideWb','calWbTotal');
+}
+
+function renderCalendarInto(data,gridId,sideId,totalId){
   const byDay = {};
   data.forEach(t=>{
     if(!byDay[t.date]) byDay[t.date]={pnl:0,count:0};
@@ -1290,14 +1312,14 @@ function renderCalendar(data){
         return `<span class="cal-event ${ev.type}" title="${safe}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`;
       }).join('');
       if(extra>0){
-        const moreTitle = events.slice(2).map(e=>e.label).join(' · ').replace(/"/g,'&quot;');
+        const moreTitle = events.slice(2).map(e=>e.label).join(' \u00b7 ').replace(/"/g,'&quot;');
         badges += `<span class="cal-event news" title="${moreTitle}">+${extra} more</span>`;
       }
       inner += `<div class="cal-events">${badges}</div>`;
     }
     html+=`<div class="${cls}" onclick="openDayModal('${ds}')">${inner}</div>`;
   }
-  document.getElementById('calGrid').innerHTML=html;
+  document.getElementById(gridId).innerHTML=html;
   const weeks=[];
   for(let w=0;w<6;w++){
     let wPnl=0,wDays=0;
@@ -1310,12 +1332,20 @@ function renderCalendar(data){
     const hasDays=Array.from({length:7},(_,d)=>{const dt=new Date(year,month,1-first+w*7+d);return dt.getMonth()===month;}).some(Boolean);
     if(hasDays) weeks.push({w:w+1,pnl:wPnl,days:wDays});
   }
-  document.getElementById('weeklySide').innerHTML=weeks.map(w=>`
+  document.getElementById(sideId).innerHTML=weeks.map(w=>`
     <div class="week-row">
       <div class="week-label">Week ${w.w}</div>
       <div class="week-val" style="color:${w.pnl>0?'var(--green)':w.pnl<0?'var(--red)':'var(--yellow)'}">${w.pnl>=0?'+':''}$${w.pnl.toFixed(2)}</div>
       <div class="week-days">${w.days} day${w.days!==1?'s':''}</div>
     </div>`).join('');
+
+  // Month total badge in the section header
+  const totEl = document.getElementById(totalId);
+  if(totEl){
+    const tot = data.reduce((s,t)=>s+t.pnl,0);
+    totEl.textContent = `${tot>=0?'+':''}$${tot.toFixed(2)} \u00b7 ${data.length} trade${data.length!==1?'s':''}`;
+    totEl.style.color = tot>0?'var(--green)':tot<0?'var(--red)':'var(--muted)';
+  }
 }
 
 function openDayModal(dateStr){
