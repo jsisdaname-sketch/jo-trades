@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>JO Trades — Robinhood Sync</title>
+<title>JO Trades — Webull Sync</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@600;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -15,7 +15,7 @@
     --border: #252830;
     --text: #eef0f4;
     --muted: #4a4f5e;
-    --rh-green: #00c805;
+    --wb-blue: #2f80ff;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body {
@@ -32,23 +32,23 @@
   .back:hover { color: var(--green); }
   .logo { font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
   h1 { font-family: 'Syne', sans-serif; font-size: clamp(28px, 7vw, 48px); font-weight: 800; color: #fff; margin-bottom: 8px; }
-  h1 span { color: var(--rh-green); }
+  h1 span { color: var(--wb-blue); }
   .subtitle { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); letter-spacing: 2px; margin-bottom: 48px; }
   .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; margin-bottom: 16px; }
   .card-title { font-family: 'Share Tech Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
   .status-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
   .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); flex-shrink: 0; transition: background .3s; }
-  .dot.connected { background: var(--rh-green); box-shadow: 0 0 8px rgba(0,200,5,0.5); }
+  .dot.connected { background: var(--wb-blue); box-shadow: 0 0 8px rgba(47,128,255,0.5); }
   .dot.error { background: var(--red); }
   .dot.loading { background: var(--gold); animation: pulse 1s infinite; }
   .status-text { font-family: 'Share Tech Mono', monospace; font-size: 12px; color: var(--muted); }
-  .status-text.connected { color: var(--rh-green); }
+  .status-text.connected { color: var(--wb-blue); }
   .btn { width: 100%; padding: 14px 20px; border-radius: 9px; border: none; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; letter-spacing: 1px; cursor: pointer; transition: all .2s; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
   .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn-primary { background: var(--rh-green); color: #000; }
-  .btn-primary:hover:not(:disabled) { background: #00e806; box-shadow: 0 0 20px rgba(0,200,5,0.3); }
+  .btn-primary { background: var(--wb-blue); color: #fff; }
+  .btn-primary:hover:not(:disabled) { background: #4a91ff; box-shadow: 0 0 20px rgba(47,128,255,0.3); }
   .btn-secondary { background: transparent; color: var(--text); border: 1px solid var(--border); }
-  .btn-secondary:hover:not(:disabled) { border-color: var(--green); color: var(--green); }
+  .btn-secondary:hover:not(:disabled) { border-color: var(--wb-blue); color: var(--wb-blue); }
   .btn-danger { background: transparent; color: var(--red); border: 1px solid rgba(255,92,92,0.3); font-size: 12px; padding: 10px; }
   .btn-danger:hover:not(:disabled) { background: rgba(255,92,92,0.08); }
   .divider { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
@@ -82,17 +82,17 @@
 
 <a href="/trades" class="back">← Back to Journal</a>
 <div class="logo">JO Trades</div>
-<h1>Sync <span>Robinhood</span></h1>
+<h1>Sync <span>Webull</span></h1>
 <div class="subtitle">CONNECT ONCE · AUTO-IMPORT TRADES · STAY IN SYNC</div>
 
 <div class="card" id="connect-card">
-  <div class="card-title">Step 1 — Robinhood Connection</div>
+  <div class="card-title">Step 1 — Webull Connection</div>
   <div class="status-row">
     <div class="dot" id="status-dot"></div>
     <span class="status-text" id="status-text">Not connected</span>
   </div>
   <div class="alert" id="main-alert"></div>
-  <button class="btn btn-primary" id="btn-connect" onclick="connectRobinhood()">🔗 Connect Robinhood Account</button>
+  <button class="btn btn-primary" id="btn-connect" onclick="connectWebull()">🔗 Connect Webull Account</button>
   <button class="btn btn-secondary" id="btn-fetch" onclick="fetchTrades()" style="display:none">↓ Fetch Latest Trades</button>
   <hr class="divider" id="divider-reset" style="display:none">
   <button class="btn btn-danger" id="btn-reset" onclick="resetConnection()" style="display:none">Disconnect &amp; Reset</button>
@@ -122,10 +122,10 @@
   // MUST match the storage key in trades.html exactly
   const JOURNAL_KEY = 'jo_trades_v1';
   const FUNCTIONS = '/.netlify/functions';
+  const BROKER = 'WEBULL';
   let fetchedTrades = [];
 
   window.addEventListener('DOMContentLoaded', () => {
-    // Check if already connected (user secret exists on server)
     checkConnection();
   });
 
@@ -133,13 +133,18 @@
     try {
       const res = await fetch(`${FUNCTIONS}/snaptrade-register`, { method: 'POST' });
       const data = await res.json();
-      if (res.ok && data.userSecret) setConnected();
+      if (res.ok && data.userSecret) {
+        // SnapTrade user exists — Webull may or may not be linked yet,
+        // so show the fetch button but keep connect visible too.
+        document.getElementById('btn-fetch').style.display = 'flex';
+        document.getElementById('status-text').textContent = 'SnapTrade ready — connect Webull or fetch trades';
+      }
     } catch(e) {}
   }
 
   function setConnected() {
     document.getElementById('status-dot').className = 'dot connected';
-    document.getElementById('status-text').textContent = 'Robinhood connected';
+    document.getElementById('status-text').textContent = 'Webull connected';
     document.getElementById('status-text').className = 'status-text connected';
     document.getElementById('btn-connect').style.display = 'none';
     document.getElementById('btn-fetch').style.display = 'flex';
@@ -158,17 +163,21 @@
     el.className = `alert show ${type === 'error' ? 'error' : type === 'success' ? 'success' : ''}`;
   }
 
-  async function connectRobinhood() {
+  async function connectWebull() {
     document.getElementById('btn-connect').disabled = true;
-    setLoading('Opening Robinhood authorization…');
+    setLoading('Opening Webull authorization…');
 
     try {
-      const linkRes = await fetch(`${FUNCTIONS}/snaptrade-link`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ broker: 'ROBINHOOD' }) });
+      const linkRes = await fetch(`${FUNCTIONS}/snaptrade-link`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ broker: BROKER })
+      });
       const linkData = await linkRes.json();
       if (!linkRes.ok || !linkData.redirectURI) throw new Error(linkData.error || 'Failed to get connection link');
 
-      const popup = window.open(linkData.redirectURI, 'robinhood_auth', 'width=480,height=700,left=200,top=100');
-      showAlert('A Robinhood login window just opened. Log in, authorize access, then come back here and click "Fetch Latest Trades".', 'warning');
+      const popup = window.open(linkData.redirectURI, 'webull_auth', 'width=480,height=700,left=200,top=100');
+      showAlert('A Webull login window just opened. Log in with the WEBULL account credentials (your dad\'s), authorize access, then come back here and click "Fetch Latest Trades".', 'warning');
 
       const timer = setInterval(() => {
         if (popup && popup.closed) {
@@ -188,21 +197,33 @@
 
   async function fetchTrades() {
     document.getElementById('btn-fetch').disabled = true;
-    setLoading('Fetching trades from Robinhood…');
+    setLoading('Fetching trades from Webull…');
 
     try {
-      const res = await fetch(`${FUNCTIONS}/snaptrade-sync`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ broker: 'ROBINHOOD' }) });
+      const res = await fetch(`${FUNCTIONS}/snaptrade-sync`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ broker: BROKER })
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Sync failed');
 
       fetchedTrades = data.trades || [];
-      renderPreview(fetchedTrades);
-      setConnected();
       document.getElementById('btn-fetch').disabled = false;
 
       if (fetchedTrades.length === 0) {
         showAlert(data.message || 'No completed trades found yet. Try again in a few minutes.', 'warning');
+        // If no Webull accounts are linked yet, don't show the connected state
+        if (data.message && data.message.includes('connect')) {
+          document.getElementById('status-dot').className = 'dot';
+          document.getElementById('status-text').textContent = 'Webull not connected yet';
+          document.getElementById('status-text').className = 'status-text';
+          return;
+        }
       }
+
+      renderPreview(fetchedTrades);
+      setConnected();
     } catch (e) {
       showAlert(`Sync error: ${e.message}`, 'error');
       document.getElementById('status-dot').className = 'dot error';
@@ -244,7 +265,7 @@
 
     const existingIds = new Set(existing.map(t => t.id));
 
-    // Map Robinhood trades to journal format
+    // Map Webull trades to journal format
     const newTrades = fetchedTrades
       .filter(t => !existingIds.has(t.id))
       .map(t => ({
@@ -258,8 +279,8 @@
         pnl: t.pnl,
         // Map outcome to journal format (Win/Loss/BE not win/loss/breakeven)
         outcome: t.outcome === 'win' ? 'Win' : t.outcome === 'loss' ? 'Loss' : 'BE',
-        source: 'Robinhood',
-        notes: 'Auto-synced from Robinhood',
+        source: 'Webull',
+        notes: 'Auto-synced from Webull (Dad\'s account)',
         synced: true,
       }));
 
@@ -282,7 +303,7 @@
   }
 
   function resetConnection() {
-    if (!confirm('This will disconnect Robinhood. Your journal trades will NOT be deleted.')) return;
+    if (!confirm('This will disconnect Webull. Your journal trades will NOT be deleted.')) return;
     location.reload();
   }
 </script>
