@@ -61,6 +61,9 @@ function calcPnl(orders, sourceLabel, idPrefix) {
     const avgEntry = parseFloat((g.buyCost / g.buyQty).toFixed(4));
     const avgExit = parseFloat((g.sellRevenue / g.sellQty).toFixed(4));
     const date = g.firstBuyDate ? g.firstBuyDate.split('T')[0] : '';
+    // Full timestamps (UTC ISO): first entry fill and last exit fill
+    const entryTime = g.firstBuyDate || null;
+    const exitTime = g.lastSellDate || null;
 
     trades.push({
       id: `${idPrefix}_${key}_${date}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
@@ -71,6 +74,8 @@ function calcPnl(orders, sourceLabel, idPrefix) {
       exit: avgExit,
       qty: g.buyQty,
       pnl,
+      entryTime,
+      exitTime,
       outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
       source: sourceLabel,
       notes: `Auto-synced from ${sourceLabel}. Bought ${g.buyQty} @ avg $${avgEntry}, Sold ${g.sellQty} @ avg $${avgExit}`,
