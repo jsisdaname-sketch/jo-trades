@@ -60,7 +60,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .legend-name{font-family:var(--mono);font-size:11px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .legend-amt{font-family:var(--mono);font-size:11px;color:var(--yellow);}
 .legend-pct{font-family:var(--mono);font-size:10px;color:var(--muted);min-width:38px;text-align:right;}
-.cat-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;}
+.cat-bar-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;cursor:pointer;border-radius:8px;padding:4px 6px;transition:background .15s;}
+.cat-bar-row:hover{background:rgba(255,255,255,0.045);}
+.cat-chev{font-size:8px;color:#777;transition:transform .15s;flex-shrink:0;width:10px;}
+.cat-chev.open{transform:rotate(90deg);}
+.cat-tx-list{margin:2px 0 12px 18px;border-left:2px solid rgba(255,255,255,0.09);padding-left:10px;}
+.cat-tx-row{display:flex;align-items:center;gap:10px;padding:7px 8px;border-radius:8px;cursor:pointer;transition:background .15s;}
+.cat-tx-row:hover{background:rgba(255,255,255,0.045);}
+.cat-tx-date{font-family:var(--mono);font-size:10px;color:#888;min-width:56px;flex-shrink:0;}
+.cat-tx-desc{flex:1;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.cat-tx-amt{font-family:var(--mono);font-size:12px;color:var(--red);flex-shrink:0;}
+.cat-tx-empty{font-family:var(--mono);font-size:10px;color:#777;padding:6px 8px;}
+.legend-item{cursor:pointer;}
 .cat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
 .cat-name{font-family:var(--mono);font-size:11px;min-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 .cat-track{flex:1;height:5px;background:var(--s3);border-radius:3px;overflow:hidden;}
@@ -641,7 +652,17 @@ function buildSankey(data) {
   return s;
 }
 
+// Which spending category is expanded in the report (null = none)
+let spendExpanded = null;
+let spendMonthData = [];
+
+function toggleSpendCat(i){
+  spendExpanded = (spendExpanded === i) ? null : i;
+  renderSpending(spendMonthData);
+}
+
 function renderSpending(data) {
+  spendMonthData = data;
   const expByCat = agg(data, 'expense');
   const total = Object.values(expByCat).reduce((s, v) => s + v, 0);
   const cats = getCats();
@@ -676,10 +697,10 @@ function renderSpending(data) {
       <text x="${cx}" y="${cy+10}" font-family="Space Mono" font-size="8" fill="#888" text-anchor="middle">TOTAL</text>
     </svg>`;
 
-  document.getElementById('donutLegend').innerHTML = entries.slice(0, 8).map(([name, val]) => {
+  document.getElementById('donutLegend').innerHTML = entries.slice(0, 8).map(([name, val], i) => {
     const idx = cats.indexOf(name);
     const color = CAT_COLORS[idx >= 0 ? idx % CAT_COLORS.length : CAT_COLORS.length - 1];
-    return `<div class="legend-item">
+    return `<div class="legend-item" onclick="toggleSpendCat(${i})" title="Tap to see transactions">
       <div class="legend-dot" style="background:${color}"></div>
       <div class="legend-name">${name}</div>
       <div class="legend-amt">$${val.toFixed(2)}</div>
@@ -688,15 +709,35 @@ function renderSpending(data) {
   }).join('');
 
   const maxE = entries[0]?.[1] || 1;
-  document.getElementById('spendCats').innerHTML = entries.map(([cat, amt]) => {
+  document.getElementById('spendCats').innerHTML = entries.map(([cat, amt], i) => {
     const idx = cats.indexOf(cat);
     const color = CAT_COLORS[idx >= 0 ? idx % CAT_COLORS.length : CAT_COLORS.length - 1];
-    return `<div class="cat-bar-row">
+    const isOpen = spendExpanded === i;
+
+    // When expanded: list every expense transaction in this category, newest first
+    let txList = '';
+    if (isOpen) {
+      const txs = spendMonthData
+        .filter(t => t.type === 'expense' && t.category === cat)
+        .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      txList = `<div class="cat-tx-list">${
+        txs.length ? txs.map(t => `
+          <div class="cat-tx-row" onclick="event.stopPropagation();openDetail('${t.id}')">
+            <div class="cat-tx-date">${fmtDate(t.date)}</div>
+            <div class="cat-tx-desc">${t.description}</div>
+            <div class="cat-tx-amt">-$${t.amount.toFixed(2)}</div>
+          </div>`).join('')
+        : '<div class="cat-tx-empty">No transactions</div>'
+      }</div>`;
+    }
+
+    return `<div class="cat-bar-row" onclick="toggleSpendCat(${i})">
+      <div class="cat-chev ${isOpen ? 'open' : ''}">&#9654;</div>
       <div class="cat-dot" style="background:${color}"></div>
       <div class="cat-name">${cat}</div>
       <div class="cat-track"><div class="cat-fill" style="width:${(amt/maxE*100).toFixed(1)}%;background:${color}"></div></div>
       <div class="cat-amt-lbl" style="color:var(--yellow)">${(amt/total*100).toFixed(1)}% &nbsp;$${amt.toFixed(2)}</div>
-    </div>`;
+    </div>${txList}`;
   }).join('');
 }
 
