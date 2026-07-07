@@ -4,10 +4,20 @@ function calcPnl(orders, sourceLabel, idPrefix) {
   const groups = {};
 
   for (const o of orders) {
-    const status = (o.status || '').toUpperCase();
     const action = (o.action || '').toUpperCase();
     const filledQty = parseFloat(o.filled_quantity || 0);
-    if (status !== 'EXECUTED' || filledQty === 0) continue;
+
+    // FIX: count ANY order that actually filled contracts, regardless of
+    // final status. Partially-filled-then-canceled orders end up with a
+    // status like PARTIAL_CANCELED (not EXECUTED), but the filled portion
+    // is a real trade with real money. Filtering on status alone was
+    // silently dropping those fills and inflating P&L.
+    if (filledQty === 0) continue;
+
+    const price = parseFloat(o.execution_price || 0);
+    // No trustworthy fill price = can't use this order. Skip it rather
+    // than poison the averages with $0.
+    if (!price || price <= 0) continue;
 
     const isOption = !!o.option_symbol;
     const ticker = isOption
@@ -28,7 +38,6 @@ function calcPnl(orders, sourceLabel, idPrefix) {
       firstBuyPrice: null, lastSellPrice: null,
     };
 
-    const price = parseFloat(o.execution_price || 0);
     const isBuy = action.includes('BUY');
     const date = o.time_executed || o.time_placed || '';
 
@@ -57,13 +66,29 @@ function calcPnl(orders, sourceLabel, idPrefix) {
     if (g.buyQty === 0 || g.sellQty === 0) continue;
 
     const mult = (g.tradeType === 'Call' || g.tradeType === 'Put') ? 100 : 1;
-    const pnl = parseFloat(((g.sellRevenue - g.buyCost) * mult).toFixed(2));
     const avgEntry = parseFloat((g.buyCost / g.buyQty).toFixed(4));
     const avgExit = parseFloat((g.sellRevenue / g.sellQty).toFixed(4));
+
+    // FIX: compute P&L on the MATCHED quantity (contracts both bought and
+    // sold). If buys and sells don't line up — open position, or a broker
+    // data gap — the old (sellRevenue - buyCost) math produced phantom
+    // profit/loss because it compared unequal quantities. Matched-qty math
+    // gives the honest realized P&L: (avg exit - avg entry) per contract,
+    // times contracts actually round-tripped.
+    const matchedQty = Math.min(g.buyQty, g.sellQty);
+    const pnl = parseFloat(((avgExit - avgEntry) * matchedQty * mult).toFixed(2));
+
+    const qtyMismatch = g.buyQty !== g.sellQty;
+
     const date = g.firstBuyDate ? g.firstBuyDate.split('T')[0] : '';
     // Full timestamps (UTC ISO): first entry fill and last exit fill
     const entryTime = g.firstBuyDate || null;
     const exitTime = g.lastSellDate || null;
+
+    let notes = `Auto-synced from ${sourceLabel}. Bought ${g.buyQty} @ avg $${avgEntry}, Sold ${g.sellQty} @ avg $${avgExit}`;
+    if (qtyMismatch) {
+      notes += ` — QTY MISMATCH (${g.buyQty} bought vs ${g.sellQty} sold). P&L calculated on ${matchedQty} matched contracts; verify against broker.`;
+    }
 
     trades.push({
       id: `${idPrefix}_${key}_${date}`.replace(/[^a-zA-Z0-9_-]/g, '_'),
@@ -72,13 +97,13 @@ function calcPnl(orders, sourceLabel, idPrefix) {
       type: g.tradeType,
       entry: avgEntry,
       exit: avgExit,
-      qty: g.buyQty,
+      qty: matchedQty,
       pnl,
       entryTime,
       exitTime,
       outcome: pnl > 0 ? 'win' : pnl < 0 ? 'loss' : 'breakeven',
       source: sourceLabel,
-      notes: `Auto-synced from ${sourceLabel}. Bought ${g.buyQty} @ avg $${avgEntry}, Sold ${g.sellQty} @ avg $${avgExit}`,
+      notes,
       synced: true,
     });
   }
