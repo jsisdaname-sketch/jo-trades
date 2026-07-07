@@ -1316,11 +1316,11 @@ function renderCalendar(data){
   // Split: everything that's mine (Robinhood + manual entries) vs Dad's Webull
   const mine = data.filter(t=>t.source!=='Webull');
   const dads = data.filter(t=>t.source==='Webull');
-  renderCalendarInto(mine,'calGrid','weeklySide','calMineTotal');
-  renderCalendarInto(dads,'calGridWb','weeklySideWb','calWbTotal');
+  renderCalendarInto(mine,'calGrid','weeklySide','calMineTotal','mine');
+  renderCalendarInto(dads,'calGridWb','weeklySideWb','calWbTotal','webull');
 }
 
-function renderCalendarInto(data,gridId,sideId,totalId){
+function renderCalendarInto(data,gridId,sideId,totalId,acct){
   const byDay = {};
   data.forEach(t=>{
     if(!byDay[t.date]) byDay[t.date]={pnl:0,count:0};
@@ -1357,7 +1357,7 @@ function renderCalendarInto(data,gridId,sideId,totalId){
       }
       inner += `<div class="cal-events">${badges}</div>`;
     }
-    html+=`<div class="${cls}" onclick="openDayModal('${ds}')">${inner}</div>`;
+    html+=`<div class="${cls}" onclick="openDayModal('${ds}','${acct}')">${inner}</div>`;
   }
   document.getElementById(gridId).innerHTML=html;
   const weeks=[];
@@ -1388,10 +1388,16 @@ function renderCalendarInto(data,gridId,sideId,totalId){
   }
 }
 
-function openDayModal(dateStr){
-  const trades = getData().filter(t=>t.date===dateStr);
+function openDayModal(dateStr,acct){
+  // Only show trades from the account whose calendar was clicked.
+  // Without this filter, clicking a day on YOUR calendar also showed
+  // Dad's Webull trades from the same date (and vice versa), which made
+  // it look like trades were syncing into the wrong account.
+  let trades = getData().filter(t=>t.date===dateStr);
+  if(acct==='webull') trades = trades.filter(t=>t.source==='Webull');
+  else if(acct==='mine') trades = trades.filter(t=>t.source!=='Webull');
   const label = new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
-  document.getElementById('dayModalTitle').textContent=label;
+  document.getElementById('dayModalTitle').textContent = label + (acct==='webull' ? " — Dad's Webull" : '');
 
   // Market context stickies for this day
   const evs = eventsForDate(dateStr);
