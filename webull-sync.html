@@ -285,12 +285,10 @@
     cloud.forEach(add); local.forEach(add);
     const existing = [...Object.values(byId), ...noId];
 
-    const existingIds = new Set(existing.map(t => t.id));
-
-    // Map Webull trades to journal format
-    const newTrades = fetchedTrades
-      .filter(t => !existingIds.has(t.id))
-      .map(t => ({
+    // Map fresh Webull trades to journal format, indexed by id
+    const freshById = {};
+    for (const t of fetchedTrades) {
+      freshById[t.id] = {
         id: t.id,
         ticker: t.ticker,
         date: t.date,
@@ -299,14 +297,45 @@
         exit: t.exit,
         size: t.qty,
         pnl: t.pnl,
+        entryTime: t.entryTime || null,
+        exitTime: t.exitTime || null,
         // Map outcome to journal format (Win/Loss/BE not win/loss/breakeven)
         outcome: t.outcome === 'win' ? 'Win' : t.outcome === 'loss' ? 'Loss' : 'BE',
         source: 'Webull',
         notes: 'Auto-synced from Webull (Dad\'s account)',
         synced: true,
-      }));
+      };
+    }
 
-    const merged = [...existing, ...newTrades];
+    // REFRESH, don't just skip: if a synced trade already exists, update its
+    // broker numbers (entry/exit/size/pnl/outcome/timestamps) from the fresh
+    // sync while keeping everything you typed by hand (journal, mood,
+    // screenshots, lessons, tags). This means a bad number from an old sync
+    // self-corrects on the next sync instead of being stuck forever.
+    let refreshedCount = 0;
+    const existingUpdated = existing.map(t => {
+      if (!t || !t.id || !freshById[t.id]) return t;
+      const fresh = freshById[t.id];
+      delete freshById[t.id]; // consumed — won't be added again as new
+      if (!t.synced) return t; // never touch manually-entered trades
+      refreshedCount++;
+      return {
+        ...t, // keep all manual annotations
+        entry: fresh.entry,
+        exit: fresh.exit,
+        size: fresh.size,
+        pnl: fresh.pnl,
+        outcome: fresh.outcome,
+        date: fresh.date,
+        entryTime: fresh.entryTime,
+        exitTime: fresh.exitTime,
+      };
+    });
+
+    // Anything left in freshById is genuinely new
+    const newTrades = Object.values(freshById);
+
+    const merged = [...existingUpdated, ...newTrades];
     localStorage.setItem(JOURNAL_KEY, JSON.stringify(merged));
 
     // Also push to cloud
@@ -317,7 +346,7 @@
     }).catch(() => {});
 
     const note = document.getElementById('import-note');
-    note.textContent = `✓ ${newTrades.length} new trades imported! ${fetchedTrades.length - newTrades.length} duplicates skipped. Redirecting to journal…`;
+    note.textContent = `✓ ${newTrades.length} new trades imported, ${refreshedCount} existing trades refreshed with corrected numbers. Redirecting to journal…`;
     note.className = 'alert show success';
 
     setTimeout(() => { window.location.href = '/trades'; }, 2000);
