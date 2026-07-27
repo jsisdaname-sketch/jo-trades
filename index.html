@@ -147,7 +147,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .tx-apple{background:rgba(180,247,84,.1);color:var(--green);padding:2px 5px;border-radius:3px;font-size:8px;}
 .tx-amt{font-family:var(--mono);font-size:14px;font-weight:700;flex-shrink:0;}
 .tx-amt.income{color:var(--green);}
-.tx-amt.expense{color:var(--yellow);}
+.tx-amt.expense{color:var(--red);}
 .tx-del{position:absolute;top:6px;right:6px;background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;opacity:0;padding:3px;}
 .tx:hover .tx-del{opacity:1;}
 .detail-img{width:100%;border-radius:12px;max-height:200px;object-fit:contain;background:var(--s2);margin-bottom:14px;display:none;}
@@ -196,6 +196,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .eti-reset:hover{border-color:var(--green);color:var(--text);}
 .eti-advice{font-size:13px;line-height:1.6;margin-top:6px;}
 .eti-note{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.7;margin-top:16px;text-align:center;}
+/* ---------- v4: behavioral layer ---------- */
+.hero{background:linear-gradient(160deg,#151515,#0d0d0d);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;}
+.hero-r1{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;}
+.hero-cap{font-family:var(--mono);font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+.hero-big{font-family:var(--mono);font-size:32px;font-weight:700;line-height:1;letter-spacing:-1.5px;}
+.hero-time{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:7px;}
+.pace-pill{font-family:var(--mono);font-size:10px;padding:5px 10px;border-radius:20px;white-space:nowrap;text-align:right;}
+.pace-ok{background:rgba(180,247,84,.12);color:var(--green);}
+.pace-bad{background:rgba(255,82,82,.12);color:var(--red);}
+.pace-neu{background:var(--s3);color:var(--muted2);}
+.hero-foot{margin-top:13px;padding-top:12px;border-top:1px solid var(--border);font-family:var(--mono);font-size:11px;color:var(--muted2);line-height:1.75;}
+.hero-foot b{color:var(--text);}
+.hero-allow{color:var(--yellow);font-weight:700;}
+.hero-nudge{font-family:var(--mono);font-size:10px;color:var(--muted);margin-top:12px;padding-top:11px;border-top:1px solid var(--border);cursor:pointer;}
+.hero-nudge span{color:var(--green);}
+.cat-cap-lbl{font-family:var(--mono);font-size:9px;color:var(--muted);min-width:34px;text-align:right;}
+.cat-track.over .cat-fill{background:var(--red)!important;}
+.pace-wrap{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.pace-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;gap:10px;}
+.pace-key{font-family:var(--mono);font-size:8px;color:var(--muted);display:flex;gap:10px;white-space:nowrap;}
+.pace-note{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:8px;text-align:center;}
+.mini-card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.mini-hd{display:flex;align-items:center;gap:8px;margin-bottom:9px;}
+.mini-ttl{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted2);}
+.mini-big{font-family:var(--mono);font-size:23px;font-weight:700;line-height:1;}
+.mini-note{font-family:var(--mono);font-size:10px;color:var(--muted2);margin-top:7px;line-height:1.65;}
+.worth-q{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);margin-top:16px;margin-bottom:7px;}
+.worth-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.wbtn{padding:12px;border-radius:10px;border:2px solid var(--border);background:var(--s2);font-family:var(--mono);font-size:11px;color:var(--muted2);cursor:pointer;text-transform:uppercase;letter-spacing:1px;text-align:center;}
+.wbtn.keep.on{border-color:var(--green);background:rgba(180,247,84,.1);color:var(--green);font-weight:700;}
+.wbtn.regret.on{border-color:var(--red);background:rgba(255,82,82,.1);color:var(--red);font-weight:700;}
+.tx-worth{font-size:8px;padding:2px 5px;border-radius:3px;text-transform:uppercase;}
+.tx-worth.regret{background:rgba(255,82,82,.14);color:var(--red);}
+.tx-worth.keep{background:rgba(180,247,84,.1);color:var(--green);}
+.bud-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bud-name{font-family:var(--mono);font-size:11px;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.bud-inp{width:100px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;text-align:right;-webkit-appearance:none;appearance:none;}
+.bud-inp:focus{border-color:var(--green);}
+.set-hint{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.75;margin-bottom:11px;}
 </style>
 </head>
 <body>
@@ -225,6 +264,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 
   <div class="view on" id="tab-overview">
+    <div class="hero" id="heroCard"></div>
     <div class="summary-grid">
       <div class="scard"><div class="sval g" id="ov-income">$0</div><div class="slabel">Total Income</div></div>
       <div class="scard"><div class="sval r" id="ov-expense">$0</div><div class="slabel">Total Expenses</div></div>
@@ -241,6 +281,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
         <div class="flow-exp" id="ov-exbar" style="width:0%"></div>
       </div>
     </div>
+    <div class="pace-wrap">
+      <div class="pace-hd">
+        <div class="sec-lbl" style="margin-bottom:0">Pace vs Last Month</div>
+        <div class="pace-key">
+          <span style="color:var(--green)">&#9473; this month</span>
+          <span style="color:var(--muted2)">&#9476; last month</span>
+        </div>
+      </div>
+      <div id="paceChart"></div>
+    </div>
+    <div id="ov-regret"></div>
+    <div id="ov-recurring"></div>
     <div class="sec-lbl">Spending by Category</div>
     <div id="ov-cats" style="margin-bottom:22px"></div>
     <div class="sec-lbl">Recent Transactions</div>
@@ -317,6 +369,24 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
   </div>
 
   <div class="view" id="tab-settings">
+    <div class="set-block">
+      <div class="set-title">Anchors</div>
+      <div class="set-hint">A number means nothing without a reference point.<br>Set these two and the whole dashboard wakes up.</div>
+      <div class="bud-row">
+        <div class="bud-name">Monthly spend target</div>
+        <input type="number" class="bud-inp" id="setTarget" placeholder="0" inputmode="decimal" onchange="saveSetting('monthlyTarget',this.value)"/>
+      </div>
+      <div class="bud-row">
+        <div class="bud-name">Your hourly rate ($)</div>
+        <input type="number" class="bud-inp" id="setRate" placeholder="0" inputmode="decimal" onchange="saveSetting('hourlyRate',this.value)"/>
+      </div>
+      <div class="set-hint" style="margin:9px 0 0">Hourly rate converts dollars into hours of your life. It hits harder than a dollar sign.</div>
+    </div>
+    <div class="set-block">
+      <div class="set-title">Category Budgets</div>
+      <div class="set-hint">Leave blank to skip a category. Dashboard bars fill toward these caps instead of toward each other.</div>
+      <div id="budgetRows"></div>
+    </div>
     <div class="set-block">
       <div class="set-title">Import / Export Data</div>
       <label class="set-btn" style="position:relative;cursor:pointer;display:flex;align-items:center;gap:6px;">
@@ -407,6 +477,13 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
     </div>
     <img id="detailImg" class="detail-img"/>
     <div id="detailContent"></div>
+    <div id="worthBlock" style="display:none">
+      <div class="worth-q">Knowing what you know now &mdash; was it worth it?</div>
+      <div class="worth-btns">
+        <div class="wbtn keep" id="wKeep" onclick="setWorth('keep')">&#128077; Worth it</div>
+        <div class="wbtn regret" id="wRegret" onclick="setWorth('regret')">&#128078; Regret</div>
+      </div>
+    </div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px">
       <button class="save-btn" style="margin-top:0;background:var(--s3);color:var(--green);border:1px solid var(--green)" onclick="editFromDetail()">&#9998; EDIT</button>
       <button class="save-btn danger" style="margin-top:0" onclick="deleteFromDetail()">&#128465; DELETE</button>
@@ -418,6 +495,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 const PW = "JO2026";
 const SK = "jo_v3";
 const SK_CATS = "jo_cats_v3";
+const SK_BUD = "jo_budgets_v1";
+const SK_SET = "jo_settings_v1";
 const DEFAULT_CATS = ["Food","Gas","Shopping","Gifts","Subscriptions","Trading","Business","Health","Rent","Travel","Other"];
 const CAT_COLORS = ["#b4f754","#ffd166","#52b4ff","#ff6bce","#c084fc","#ff8c52","#34d399","#ff5252","#f7c984","#84c8f7","#888"];
 const INC_COLORS = ["#52b4ff","#6bc5ff","#84d6ff","#9de7ff","#b4f0ff"];
@@ -444,6 +523,29 @@ function getData() { try { return JSON.parse(localStorage.getItem(SK)) || []; } 
 function saveAll(d) { try { localStorage.setItem(SK, JSON.stringify(d)); syncToCloud(); } catch { alert('Storage full! Export and clear old data.'); } }
 function getCats() { const s = localStorage.getItem(SK_CATS); return s ? JSON.parse(s) : [...DEFAULT_CATS]; }
 function saveCats(c) { localStorage.setItem(SK_CATS, JSON.stringify(c)); syncToCloud(); }
+function getBudgets() { try { return JSON.parse(localStorage.getItem(SK_BUD)) || {}; } catch { return {}; } }
+function saveBudgets(b) { localStorage.setItem(SK_BUD, JSON.stringify(b)); syncToCloud(); }
+function getSettings() { try { return JSON.parse(localStorage.getItem(SK_SET)) || {}; } catch { return {}; } }
+function saveSettings(s) { localStorage.setItem(SK_SET, JSON.stringify(s)); syncToCloud(); }
+function saveSetting(k, v) {
+  const s = getSettings();
+  const n = parseFloat(v);
+  if (!v || isNaN(n) || n <= 0) delete s[k]; else s[k] = n;
+  saveSettings(s); renderAll();
+}
+function saveBudget(cat, v) {
+  const b = getBudgets();
+  const n = parseFloat(v);
+  if (!v || isNaN(n) || n <= 0) delete b[cat]; else b[cat] = n;
+  saveBudgets(b); renderAll();
+}
+function hoursOf(amt) {
+  const r = getSettings().hourlyRate;
+  if (!r || r <= 0) return '';
+  const h = amt / r;
+  if (h < 1) return Math.round(h * 60) + ' min of work';
+  return (h < 10 ? h.toFixed(1) : Math.round(h)) + ' hrs of work';
+}
 let _syncTimer = null;
 function syncToCloud() {
   clearTimeout(_syncTimer);
@@ -451,7 +553,7 @@ function syncToCloud() {
     fetch('/api/save-data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactions: getData(), categories: getCats() })
+      body: JSON.stringify({ transactions: getData(), categories: getCats(), budgets: getBudgets(), settings: getSettings() })
     }).catch(() => {});
   }, 1000);
 }
@@ -480,7 +582,7 @@ function switchTab(t) {
   document.querySelectorAll('.tab').forEach((el, i) => el.classList.toggle('active', ['overview','reports','transactions','settings'][i] === t));
   document.querySelectorAll('.view').forEach(el => el.classList.remove('on'));
   document.getElementById('tab-' + t).classList.add('on');
-  if (t === 'settings') renderSettingsPills();
+  if (t === 'settings') { renderSettingsPills(); renderBudgetRows(); }
   renderAll();
 }
 function switchReport(r) {
@@ -526,19 +628,32 @@ function renderDashboard(data) {
   document.getElementById('ov-inbar').style.width = (inc / tot * 100) + '%';
   document.getElementById('ov-exbar').style.width = (exp / tot * 100) + '%';
 
+  renderHero(data);
+  document.getElementById('paceChart').innerHTML = buildPaceChart();
+  renderRegret(data);
+  renderRecurring();
+
   const expByCat = agg(data, 'expense');
   const cats = getCats();
+  const buds = getBudgets();
   const entries = Object.entries(expByCat).sort((a, b) => b[1] - a[1]).slice(0, 6);
   const maxE = entries[0]?.[1] || 1;
   document.getElementById('ov-cats').innerHTML = entries.length
     ? entries.map(([cat, amt]) => {
         const idx = cats.indexOf(cat);
         const color = CAT_COLORS[idx >= 0 ? idx % CAT_COLORS.length : CAT_COLORS.length-1];
+        const cap = buds[cat];
+        // With a cap set, the bar fills toward the cap (and turns red past it).
+        // Without one, it falls back to the old relative-to-largest behaviour.
+        const pctOfCap = cap ? (amt / cap * 100) : null;
+        const width = cap ? Math.min(pctOfCap, 100) : (amt / maxE * 100);
+        const over = cap && amt > cap;
         return `<div class="cat-bar-row">
           <div class="cat-dot" style="background:${color}"></div>
           <div class="cat-name">${cat}</div>
-          <div class="cat-track"><div class="cat-fill" style="width:${(amt/maxE*100).toFixed(1)}%;background:${color}"></div></div>
-          <div class="cat-amt-lbl" style="color:var(--yellow)">$${amt.toFixed(2)}</div>
+          <div class="cat-track${over ? ' over' : ''}"><div class="cat-fill" style="width:${width.toFixed(1)}%;background:${color}"></div></div>
+          ${cap ? `<div class="cat-cap-lbl" style="color:${over ? 'var(--red)' : 'var(--muted)'}">${pctOfCap.toFixed(0)}%</div>` : ''}
+          <div class="cat-amt-lbl" style="color:${over ? 'var(--red)' : 'var(--yellow)'}">$${amt.toFixed(0)}${cap ? `<span style="color:var(--muted)">/${cap}</span>` : ''}</div>
         </div>`;
       }).join('')
     : '<div style="font-family:var(--mono);font-size:10px;color:var(--muted)">No expenses yet</div>';
@@ -547,6 +662,231 @@ function renderDashboard(data) {
   document.getElementById('ov-recent').innerHTML = recent.length
     ? recent.map(r => txCard(r)).join('')
     : '<div class="empty"><div class="empty-i">&#129534;</div>No transactions yet</div>';
+}
+
+/* ---------- v4: behavioral layer ---------- */
+
+function localToday() {
+  const t = new Date();
+  return new Date(t.getTime() - t.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+}
+
+function renderHero(data) {
+  const st = getSettings();
+  const exp = data.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+  const today = new Date();
+  const isCur = (today.getMonth() === month && today.getFullYear() === year);
+  const dim = new Date(year, month + 1, 0).getDate();
+  const elapsed = isCur ? today.getDate() : dim;
+  const left = isCur ? Math.max(dim - today.getDate(), 0) : 0;
+  const burn = elapsed > 0 ? exp / elapsed : 0;
+  const proj = burn * dim;
+  const todaySpend = isCur
+    ? data.filter(t => t.type === 'expense' && t.date === localToday()).reduce((s, t) => s + t.amount, 0)
+    : 0;
+  const target = st.monthlyTarget || 0;
+
+  const bigVal = isCur ? todaySpend : exp;
+  const bigCap = isCur ? 'Spent today' : 'Spent this month';
+  const hrs = hoursOf(bigVal);
+
+  let pill = '<div class="pace-pill pace-neu">$' + burn.toFixed(0) + '/day avg</div>';
+  if (isCur && target > 0) {
+    const cls = proj > target ? 'pace-bad' : 'pace-ok';
+    const word = proj > target ? 'over' : 'under';
+    pill = `<div class="pace-pill ${cls}">$${burn.toFixed(0)}/day<br>on pace for $${proj.toFixed(0)}<br>${Math.abs(proj - target).toFixed(0)} ${word} target</div>`;
+  } else if (isCur) {
+    pill = `<div class="pace-pill pace-neu">$${burn.toFixed(0)}/day<br>on pace for $${proj.toFixed(0)}</div>`;
+  }
+
+  let foot = '';
+  if (target > 0) {
+    const remaining = target - exp;
+    const allowed = left > 0 ? remaining / left : remaining;
+    if (remaining >= 0) {
+      foot = `<div class="hero-foot">$${exp.toFixed(0)} of <b>$${target.toFixed(0)}</b> used &middot; <b>$${remaining.toFixed(0)}</b> left`
+        + (isCur && left > 0 ? `<br>${left} days to go &mdash; <span class="hero-allow">$${allowed.toFixed(0)}/day</span> from here` : '')
+        + `</div>`;
+    } else {
+      foot = `<div class="hero-foot" style="color:var(--red)">Over target by <b style="color:var(--red)">$${Math.abs(remaining).toFixed(0)}</b>`
+        + (isCur && left > 0 ? `<br>and there are still ${left} days left in the month.` : '')
+        + `</div>`;
+    }
+  } else {
+    foot = `<div class="hero-nudge" onclick="switchTab('settings')">No monthly target set. <span>Set one in Settings &#8594;</span></div>`;
+  }
+
+  document.getElementById('heroCard').innerHTML = `
+    <div class="hero-r1">
+      <div>
+        <div class="hero-cap">${bigCap}</div>
+        <div class="hero-big" style="color:${bigVal > 0 ? 'var(--red)' : 'var(--muted2)'}">$${bigVal.toFixed(2)}</div>
+        ${hrs ? `<div class="hero-time">&asymp; ${hrs}</div>` : ''}
+      </div>
+      ${pill}
+    </div>
+    ${foot}`;
+}
+
+function buildPaceChart() {
+  const all = getData().filter(t => t.type === 'expense');
+  const dim = new Date(year, month + 1, 0).getDate();
+  let pm = month - 1, py = year;
+  if (pm < 0) { pm = 11; py--; }
+  const pdim = new Date(py, pm + 1, 0).getDate();
+
+  const cum = (mo, yr, days) => {
+    const arr = new Array(days + 1).fill(0);
+    all.forEach(t => {
+      const d = new Date(t.date + 'T12:00:00');
+      if (d.getMonth() === mo && d.getFullYear() === yr) {
+        const day = d.getDate();
+        if (day >= 1 && day <= days) arr[day] += t.amount;
+      }
+    });
+    for (let i = 1; i <= days; i++) arr[i] += arr[i - 1];
+    return arr;
+  };
+
+  const cur = cum(month, year, dim), prev = cum(pm, py, pdim);
+  const today = new Date();
+  const isCur = (today.getMonth() === month && today.getFullYear() === year);
+  const upTo = isCur ? Math.min(today.getDate(), dim) : dim;
+
+  if (cur[upTo] === 0 && prev[pdim] === 0) {
+    return '<div class="sankey-empty">Two months of expenses<br>and this line starts telling you something.</div>';
+  }
+
+  const max = Math.max(cur[upTo], prev[pdim], 1);
+  const W = 520, H = 130, PL = 6, PR = 6, PT = 10, PB = 8;
+  const x = (d, days) => PL + (d / days) * (W - PL - PR);
+  const y = v => PT + (1 - v / max) * (H - PT - PB);
+  const line = (arr, days, upto) => {
+    let p = '';
+    for (let i = 0; i <= upto; i++) p += (i ? 'L' : 'M') + x(i, days).toFixed(1) + ',' + y(arr[i]).toFixed(1);
+    return p;
+  };
+
+  let s = `<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">`;
+  s += `<line x1="${PL}" y1="${y(0)}" x2="${W - PR}" y2="${y(0)}" stroke="#2a2a2a" stroke-width="1"/>`;
+  if (prev[pdim] > 0) s += `<path d="${line(prev, pdim, pdim)}" fill="none" stroke="#555" stroke-width="2" stroke-dasharray="5 4"/>`;
+  s += `<path d="${line(cur, dim, upTo)}" fill="none" stroke="#b4f754" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round"/>`;
+  const ex = x(upTo, dim), ey = y(cur[upTo]);
+  s += `<circle cx="${ex.toFixed(1)}" cy="${ey.toFixed(1)}" r="3.5" fill="#b4f754"/>`;
+  s += '</svg>';
+
+  // Same point in the month, last month - the only fair comparison.
+  const cmpDay = Math.min(Math.round(upTo / dim * pdim), pdim);
+  const prevAtSame = prev[cmpDay];
+  let note = '';
+  if (prevAtSame > 0) {
+    const diff = cur[upTo] - prevAtSame;
+    const pct = Math.abs(diff / prevAtSame * 100);
+    const col = diff > 0 ? 'var(--red)' : 'var(--green)';
+    const arrow = diff > 0 ? '&#9650;' : '&#9660;';
+    note = `<div class="pace-note">By this point last month you'd spent <b style="color:var(--text)">$${prevAtSame.toFixed(0)}</b>.
+      <span style="color:${col};font-weight:700">${arrow} $${Math.abs(diff).toFixed(0)} (${pct.toFixed(0)}%)</span></div>`;
+  }
+  return s + note;
+}
+
+function renderRegret(data) {
+  const exps = data.filter(t => t.type === 'expense');
+  const out = document.getElementById('ov-regret');
+  if (!exps.length) { out.innerHTML = ''; return; }
+
+  const reg = exps.filter(t => t.worth === 'regret');
+  const tagged = exps.filter(t => t.worth).length;
+
+  if (!tagged) {
+    out.innerHTML = `<div class="mini-card">
+      <div class="mini-hd"><div style="font-size:16px">&#129300;</div><div class="mini-ttl">Regret Ledger</div></div>
+      <div class="mini-note">Open any transaction and mark it <b style="color:var(--green)">Worth it</b> or <b style="color:var(--red)">Regret</b>.
+      Categories tell you where money went. This tells you which of it you'd take back &mdash; the only part you can actually change.</div>
+    </div>`;
+    return;
+  }
+
+  const total = reg.reduce((s, t) => s + t.amount, 0);
+  const expTotal = exps.reduce((s, t) => s + t.amount, 0);
+  const pct = expTotal > 0 ? (total / expTotal * 100) : 0;
+  const hrs = hoursOf(total);
+  const top = [...reg].sort((a, b) => b.amount - a.amount).slice(0, 3);
+
+  out.innerHTML = `<div class="mini-card" style="border-left:3px solid ${total > 0 ? 'var(--red)' : 'var(--green)'}">
+    <div class="mini-hd"><div style="font-size:16px">${total > 0 ? '&#128078;' : '&#9989;'}</div><div class="mini-ttl">Regret Ledger &middot; This Month</div></div>
+    <div class="mini-big" style="color:${total > 0 ? 'var(--red)' : 'var(--green)'}">$${total.toFixed(2)}</div>
+    <div class="mini-note">${total > 0
+      ? `${pct.toFixed(0)}% of this month's spending you'd take back${hrs ? ` &mdash; ${hrs}` : ''}.`
+      : `Nothing regretted yet. ${tagged} reviewed.`}
+      <span style="color:var(--muted)">&middot; ${tagged}/${exps.length} reviewed</span></div>
+    ${top.length ? `<div style="margin-top:10px">${top.map(t =>
+      `<div class="insight-row"><span>${t.description}</span><span style="color:var(--red)">$${t.amount.toFixed(2)}</span></div>`
+    ).join('')}</div>` : ''}
+  </div>`;
+}
+
+function renderRecurring() {
+  const all = getData().filter(t => t.type === 'expense');
+  const out = document.getElementById('ov-recurring');
+  const map = {};
+  all.forEach(t => {
+    const k = (t.description || '').toLowerCase().trim();
+    if (!k) return;
+    if (!map[k]) map[k] = { o: t.description, months: new Set(), tot: 0 };
+    const d = new Date(t.date + 'T12:00:00');
+    map[k].months.add(d.getFullYear() + '-' + d.getMonth());
+    map[k].tot += t.amount;
+  });
+  // A charge that shows up in 2+ separate months is a subscription, not a purchase.
+  const rec = Object.values(map)
+    .filter(v => v.months.size >= 2)
+    .map(v => ({ o: v.o, mo: v.tot / v.months.size }))
+    .sort((a, b) => b.mo - a.mo);
+
+  if (!rec.length) { out.innerHTML = ''; return; }
+
+  const monthly = rec.reduce((s, v) => s + v.mo, 0);
+  const annual = monthly * 12;
+  const hrs = hoursOf(annual);
+
+  out.innerHTML = `<div class="mini-card" style="border-left:3px solid var(--yellow)">
+    <div class="mini-hd"><div style="font-size:16px">&#9851;&#65039;</div><div class="mini-ttl">Recurring Drag &middot; Annualized</div></div>
+    <div class="mini-big" style="color:var(--yellow)">$${annual.toFixed(0)}<span style="font-size:12px;color:var(--muted2)">/yr</span></div>
+    <div class="mini-note">$${monthly.toFixed(0)}/mo across ${rec.length} recurring charge${rec.length === 1 ? '' : 's'}${hrs ? ` &mdash; ${hrs} every year` : ''}.</div>
+    <div style="margin-top:10px">${rec.slice(0, 5).map(v =>
+      `<div class="insight-row"><span>${v.o}</span><span>$${(v.mo * 12).toFixed(0)}/yr</span></div>`
+    ).join('')}</div>
+  </div>`;
+}
+
+function setWorth(v) {
+  if (!detailId) return;
+  const d = getData();
+  const i = d.findIndex(r => r.id === detailId);
+  if (i < 0) return;
+  d[i].worth = (d[i].worth === v) ? null : v;  // tapping the same one again clears it
+  saveAll(d);
+  paintWorth(d[i].worth);
+  renderAll();
+}
+function paintWorth(v) {
+  document.getElementById('wKeep').className = 'wbtn keep' + (v === 'keep' ? ' on' : '');
+  document.getElementById('wRegret').className = 'wbtn regret' + (v === 'regret' ? ' on' : '');
+}
+
+function renderBudgetRows() {
+  const buds = getBudgets();
+  const cats = getCats();
+  document.getElementById('budgetRows').innerHTML = cats.map(c =>
+    `<div class="bud-row">
+      <div class="bud-name">${c}</div>
+      <input type="number" class="bud-inp" inputmode="decimal" placeholder="&mdash;" value="${buds[c] || ''}" onchange="saveBudget('${c.replace(/'/g, "\\'")}',this.value)"/>
+    </div>`
+  ).join('');
+  const st = getSettings();
+  document.getElementById('setTarget').value = st.monthlyTarget || '';
+  document.getElementById('setRate').value = st.hourlyRate || '';
 }
 
 function renderCashFlow(data) {
@@ -1009,6 +1349,7 @@ function txCard(r) {
         <span>${fmtDate(r.date)}</span>
         <span class="tx-badge">${r.category}</span>
         ${r.source === 'apple' ? '<span class="tx-apple">&#127822;</span>' : ''}
+        ${r.worth === 'regret' ? '<span class="tx-worth regret">regret</span>' : r.worth === 'keep' ? '<span class="tx-worth keep">worth it</span>' : ''}
       </div>
     </div>
     <div class="tx-amt ${r.type}">${r.type==='income'?'+':'-'}$${r.amount.toFixed(2)}</div>
@@ -1103,11 +1444,15 @@ function openDetail(id) {
     <div class="drow"><span class="dk">Description</span><span class="dv">${r.description}</span></div>
     <div class="drow"><span class="dk">Amount</span><span class="dv" style="color:${r.type==='income'?'var(--green)':'var(--red)'}">
       ${r.type==='income'?'+':'-'}$${r.amount.toFixed(2)}</span></div>
+    ${r.type === 'expense' && hoursOf(r.amount) ? `<div class="drow"><span class="dk">Cost in time</span><span class="dv" style="color:var(--yellow)">${hoursOf(r.amount)}</span></div>` : ''}
     <div class="drow"><span class="dk">Type</span><span class="dv">${r.type === 'income' ? 'Income (In)' : 'Expense (Out)'}</span></div>
     <div class="drow"><span class="dk">Category</span><span class="dv">${r.category}</span></div>
     <div class="drow"><span class="dk">Date</span><span class="dv">${fmtDate(r.date)}</span></div>
     ${r.source==='apple'?`<div class="drow"><span class="dk">Source</span><span class="dv" style="color:var(--green)">&#127822; Apple Card</span></div>`:''}
     ${r.notes?`<div class="drow"><span class="dk">Notes</span><span class="dv">${r.notes}</span></div>`:''}`;
+  const wb = document.getElementById('worthBlock');
+  if (r.type === 'expense') { wb.style.display = 'block'; paintWorth(r.worth); }
+  else wb.style.display = 'none';
   document.getElementById('detailModal').classList.add('open');
 }
 function closeDetail() { document.getElementById('detailModal').classList.remove('open'); detailId = null; }
@@ -1269,7 +1614,7 @@ async function cloudPush() {
     const resp = await fetch('/api/save-data', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ transactions: getData(), categories: getCats() })
+      body: JSON.stringify({ transactions: getData(), categories: getCats(), budgets: getBudgets(), settings: getSettings() })
     });
     if (!resp.ok) throw new Error('Save failed');
     status.textContent = '\u2713 Data pushed to cloud at ' + new Date().toLocaleTimeString();
@@ -1293,6 +1638,8 @@ async function cloudPull(silent) {
     if (data.categories && data.categories.length > 0) {
       saveCats(data.categories);
     }
+    if (data.budgets && Object.keys(data.budgets).length > 0) saveBudgets(data.budgets);
+    if (data.settings && Object.keys(data.settings).length > 0) saveSettings(data.settings);
     renderAll();
     if (!silent) {
       status.textContent = '\u2713 Pulled ' + (data.transactions ? data.transactions.length : 0) + ' transactions from cloud';
@@ -1316,6 +1663,8 @@ async function autoCloudSync() {
     if (local.length === 0 && cloud.transactions && cloud.transactions.length > 0) {
       saveAll(cloud.transactions);
       if (cloud.categories) saveCats(cloud.categories);
+      if (cloud.budgets && Object.keys(cloud.budgets).length) saveBudgets(cloud.budgets);
+      if (cloud.settings && Object.keys(cloud.settings).length) saveSettings(cloud.settings);
       renderAll();
       const status = document.getElementById('syncStatus');
       if (status) { status.textContent = '\u2713 Restored ' + cloud.transactions.length + ' transactions from cloud'; status.style.color = 'var(--green)'; }
@@ -1323,7 +1672,7 @@ async function autoCloudSync() {
       await fetch('/api/save-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transactions: local, categories: getCats() })
+        body: JSON.stringify({ transactions: local, categories: getCats(), budgets: getBudgets(), settings: getSettings() })
       });
       const status = document.getElementById('syncStatus');
       if (status) { status.textContent = '\u2713 Backed up ' + local.length + ' transactions to cloud'; status.style.color = 'var(--green)'; }

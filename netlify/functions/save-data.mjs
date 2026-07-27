@@ -13,6 +13,12 @@ export default async (req) => {
   if (body.categories !== undefined) {
     await store.setJSON("categories", body.categories);
   }
+  if (body.budgets !== undefined) {
+    await store.setJSON("budgets", body.budgets);
+  }
+  if (body.settings !== undefined) {
+    await store.setJSON("settings", body.settings);
+  }
   return Response.json({ ok: true });
 };
 
