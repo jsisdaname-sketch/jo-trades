@@ -3,6 +3,6 @@
   "version": "1.0.0",
   "dependencies": {
     "@netlify/blobs": "^8.1.0",
-    "snaptrade-typescript-sdk": "latest"
+    "snaptrade-typescript-sdk": "10.9.1"
   }
 }
