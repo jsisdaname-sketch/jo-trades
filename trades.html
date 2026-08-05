@@ -1036,8 +1036,14 @@ let activeTab = "dashboard", tradeFilter = "All";
 let analyticsRange = "month";
 let galleryAcct = 'mine';
 let analyticsAcct = 'mine';
+// ── ACCOUNT MEMBERSHIP ──
+// A trade's ACCOUNT (whose money: 'webull' = Dad's, 'mine' = my Robinhood/manual)
+// is a separate concept from its SOURCE/category (Fakes / J Tradez / Enrich / Own / Other).
+// Older trades don't have an `account` field yet, so we derive it from the legacy
+// rule (source==='Webull') on the fly. Nothing is rewritten until a trade is saved.
+function acctOf(t){ return t.account || (t.source==='Webull' ? 'webull' : 'mine'); }
 // Split any trade list into my trades vs Dad's Webull trades
-function acctSplit(data,who){ return who==='webull' ? data.filter(t=>t.source==='Webull') : data.filter(t=>t.source!=='Webull'); }
+function acctSplit(data,who){ return who==='webull' ? data.filter(t=>acctOf(t)==='webull') : data.filter(t=>acctOf(t)==='mine'); }
 function setGalleryAcct(a){
   galleryAcct=a;
   document.getElementById('gacct-mine').className='acct-pill'+(a==='mine'?' active-mine':'');
@@ -1206,8 +1212,8 @@ function setFilter(f){
 }
 function renderAll(){
   const data = getMonthData();
-  if(activeTab==='dashboard') renderDashboard(data.filter(t=>t.source!=='Webull'),'mine');
-  if(activeTab==='webull') renderDashboard(data.filter(t=>t.source==='Webull'),'webull');
+  if(activeTab==='dashboard') renderDashboard(data.filter(t=>acctOf(t)!=='webull'),'mine');
+  if(activeTab==='webull') renderDashboard(data.filter(t=>acctOf(t)==='webull'),'webull');
   if(activeTab==='calendar') renderCalendar(data);
   if(activeTab==='trades') renderTrades(data);
   if(activeTab==='gallery') renderGallery(acctSplit(data,galleryAcct));
@@ -1337,8 +1343,8 @@ function renderEquityCurve(sorted){
 /* ─── CALENDAR ─── */
 function renderCalendar(data){
   // Split: everything that's mine (Robinhood + manual entries) vs Dad's Webull
-  const mine = data.filter(t=>t.source!=='Webull');
-  const dads = data.filter(t=>t.source==='Webull');
+  const mine = data.filter(t=>acctOf(t)!=='webull');
+  const dads = data.filter(t=>acctOf(t)==='webull');
   renderCalendarInto(mine,'calGrid','weeklySide','calMineTotal','mine');
   renderCalendarInto(dads,'calGridWb','weeklySideWb','calWbTotal','webull');
 }
@@ -1414,8 +1420,8 @@ function openDayModal(dateStr,acct){
   // Dad's Webull trades from the same date (and vice versa), which made
   // it look like trades were syncing into the wrong account.
   let trades = getData().filter(t=>t.date===dateStr);
-  if(acct==='webull') trades = trades.filter(t=>t.source==='Webull');
-  else if(acct==='mine') trades = trades.filter(t=>t.source!=='Webull');
+  if(acct==='webull') trades = trades.filter(t=>acctOf(t)==='webull');
+  else if(acct==='mine') trades = trades.filter(t=>acctOf(t)!=='webull');
   const label = new Date(dateStr+'T12:00:00').toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
   document.getElementById('dayModalTitle').textContent = label + (acct==='webull' ? " — Dad's Webull" : '');
   // Market context stickies for this day
@@ -1913,6 +1919,10 @@ function saveTrade(){
     strike: topStrike,
     expiry: topExpiry,
     pnl,outcome,source:selSrc,notes,
+    // ACCOUNT is sticky: preserve whatever the trade already belonged to.
+    // New manual entries default to 'mine'. Editing/re-tagging a Webull trade
+    // (e.g. marking it "J Tradez") changes its category only — never its account.
+    account: prev.account || (prev.source==='Webull' ? 'webull' : 'mine'),
     review:{...pmAnswers}, // yes/no post-market review answers
     why:prev.why||'',lesson:prev.lesson||'',emotion:prev.emotion||'',
     psychTags:prev.psychTags||[],mood:prev.mood||null,
