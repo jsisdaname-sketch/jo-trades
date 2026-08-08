@@ -1674,7 +1674,7 @@ async function exportSheet(scope) {
   const MONEY = '#,##0.00';
   const wb = new ExcelJS.Workbook();
   const ws = wb.addWorksheet(label.replace(/[\\\/\?\*\[\]:]/g, '-').slice(0, 31));
-  ws.columns = [{width:12},{width:7},{width:10},{width:20},{width:30},{width:12},{width:32}];
+  ws.columns = [{width:11},{width:12},{width:10},{width:20},{width:30},{width:12},{width:32}];
 
   const head = (vals, fill, fontColor) => {
     const r = ws.addRow(vals);
@@ -1763,14 +1763,14 @@ async function exportSheet(scope) {
 
   // TRANSACTIONS (no Source column)
   sectionTitle('TRANSACTIONS', CLR.purple);
-  head(['Date', 'Tag', 'Type', 'Category', 'Description', 'Cash Flow', 'Notes'], CLR.dark, CLR.white);
+  head(['Tag', 'Date', 'Type', 'Category', 'Description', 'Cash Flow', 'Notes'], CLR.dark, CLR.white);
   rows.forEach(r => {
     const signed = r.type === 'income' ? r.amount : -r.amount;
-    // Searchable tag: month + e/i, e.g. "07e" = July expense, "04i" = April income.
-    // Ctrl+F "07e" in Sheets jumps through July expenses only.
-    const tag = (r.date || '').slice(5, 7) + (r.type === 'income' ? 'i' : 'e');
-    const row = ws.addRow([r.date, tag, r.type, r.category, r.description, signed, r.notes || '']);
-    row.getCell(2).font = { color:{ argb:'FF888888' } };
+    // Searchable tag: YYYY-MM + e/i, e.g. "2026-07e" = July 2026 expense.
+    // Works across years; searching just "07e" still matches too.
+    const tag = (r.date || '').slice(0, 7) + (r.type === 'income' ? 'i' : 'e');
+    const row = ws.addRow([tag, r.date, r.type, r.category, r.description, signed, r.notes || '']);
+    row.getCell(1).font = { color:{ argb:'FF888888' } };
     row.getCell(6).numFmt = MONEY;
     row.getCell(6).font = { color:{ argb: signed >= 0 ? 'FF1E7A1E' : 'FFC00000' } };
   });
