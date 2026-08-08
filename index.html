@@ -238,6 +238,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
 .bud-inp:focus{border-color:var(--green);}
 .set-hint{font-family:var(--mono);font-size:9px;color:var(--muted);line-height:1.75;margin-bottom:11px;}
 </style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.4.0/exceljs.min.js" defer></script>
 </head>
 <body>
 
@@ -398,10 +399,16 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
       <div class="import-res" id="settingsImportResult" style="margin-bottom:7px"></div>
 
       <div style="border-top:1px solid var(--border);margin:6px 0 12px;padding-top:12px;">
-        <div class="set-hint" style="margin-bottom:9px">Generate a spreadsheet for Google Sheets. Pick a month or a whole year, then open it in Sheets (Drive &#8594; New &#8594; File upload, then double-click &#8594; Open with Google Sheets).</div>
+        <div class="set-hint" style="margin-bottom:9px">Generate a styled Google Sheets report (.xlsx) &#8212; colored sections, income streams, expense breakdown, month-by-month, and bank/tax reference slots. Pick a month, quarter, half, or the whole year.</div>
         <div style="display:flex;gap:8px;margin-bottom:8px;">
           <select id="expMonth" class="exp-sel">
             <option value="all">Whole year</option>
+            <option value="q1">Q1 (Jan&#8211;Mar)</option>
+            <option value="q2">Q2 (Apr&#8211;Jun)</option>
+            <option value="q3">Q3 (Jul&#8211;Sep)</option>
+            <option value="q4">Q4 (Oct&#8211;Dec)</option>
+            <option value="h1">First Half (Jan&#8211;Jun)</option>
+            <option value="h2">Second Half (Jul&#8211;Dec)</option>
             <option value="0">January</option>
             <option value="1">February</option>
             <option value="2">March</option>
@@ -417,11 +424,11 @@ body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:1
           </select>
           <select id="expYear" class="exp-sel"></select>
         </div>
-        <button class="set-btn" onclick="exportSheet('period')">&#128202; Export Selected Period</button>
+        <button class="set-btn" onclick="exportSheet('period')">&#128202; Export Styled Sheet (XLSX)</button>
         <div class="import-res" id="exportResult" style="margin:2px 0 0"></div>
       </div>
 
-      <button class="set-btn" onclick="exportSheet('all')">&#128228; Export Everything (All Time)</button>
+      <button class="set-btn" onclick="exportSheet('all')">&#128228; Export Everything (All Time, XLSX)</button>
     </div>
     <div class="set-block">
       <div class="set-title">Cloud Sync</div>
@@ -1626,68 +1633,156 @@ function populateExportYears() {
 }
 
 // scope = 'all' (everything) or 'period' (uses the month + year dropdowns)
-function exportSheet(scope) {
+// Builds a styled .xlsx: summary, income streams, expense breakdown,
+// month-by-month, bank/tax reference slots, full transaction log (no Source col).
+async function exportSheet(scope) {
   const res = document.getElementById('exportResult');
   const setMsg = (ok, txt) => { if (res) { res.className = 'import-res ' + (ok ? 'ok' : 'fail'); res.textContent = txt; } };
+  if (typeof ExcelJS === 'undefined') { setMsg(false, 'Spreadsheet library still loading \u2014 wait 2s and try again.'); return; }
   const all = getData();
   if (!all.length) { setMsg(false, 'No data yet.'); return; }
 
-  let rows, label, fname;
+  // ---- resolve period -> set of months + label + filename ----
+  let rows, label, fname, multiMonth;
   if (scope === 'all') {
-    rows = [...all];
-    label = 'All Time';
-    fname = 'JO_Budget_AllTime.csv';
+    rows = [...all]; label = 'All Time'; fname = 'JO_Budget_AllTime.xlsx'; multiMonth = true;
   } else {
     const year = document.getElementById('expYear').value;
-    const mVal = document.getElementById('expMonth').value;
-    if (mVal === 'all') {
-      rows = all.filter(r => (r.date || '').slice(0, 4) === year);
-      label = 'Year ' + year;
-      fname = 'JO_Budget_' + year + '_FullYear.csv';
-    } else {
-      const m = parseInt(mVal, 10);
-      rows = all.filter(r => {
-        const d = r.date || '';
-        return d.slice(0, 4) === year && (parseInt(d.slice(5, 7), 10) - 1) === m;
-      });
-      const mm = String(m + 1).padStart(2, '0');
-      label = EXP_MONTHS[m] + ' ' + year;
-      fname = 'JO_Budget_' + year + '-' + mm + '_' + EXP_MONTHS[m] + '.csv';
-    }
+    const v = document.getElementById('expMonth').value;
+    const RANGES = { all:[0,1,2,3,4,5,6,7,8,9,10,11], q1:[0,1,2], q2:[3,4,5], q3:[6,7,8], q4:[9,10,11], h1:[0,1,2,3,4,5], h2:[6,7,8,9,10,11] };
+    const NAMES  = { all:'Full Year', q1:'Q1', q2:'Q2', q3:'Q3', q4:'Q4', h1:'First Half', h2:'Second Half' };
+    const months = RANGES[v] || [parseInt(v, 10)];
+    rows = all.filter(r => {
+      const d = r.date || '';
+      return d.slice(0, 4) === year && months.includes(parseInt(d.slice(5, 7), 10) - 1);
+    });
+    const part = NAMES[v] || EXP_MONTHS[parseInt(v, 10)];
+    label = part + ' ' + year;
+    fname = 'JO_Budget_' + year + '_' + part.replace(/ /g, '') + '.xlsx';
+    multiMonth = months.length > 1;
   }
-
   if (!rows.length) { setMsg(false, 'No transactions in ' + label + '.'); return; }
-
   rows.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+  // ---- totals ----
   let income = 0, expense = 0;
-  rows.forEach(r => { if (r.type === 'income') income += r.amount; else expense += r.amount; });
+  rows.forEach(r => r.type === 'income' ? income += r.amount : expense += r.amount);
   const net = income - expense;
 
-  const out = [];
-  out.push(['JO Budget Export']);
-  out.push(['Period', label]);
-  out.push(['Generated', new Date().toLocaleString()]);
-  out.push([]);
-  out.push(['Total Income', income.toFixed(2)]);
-  out.push(['Total Expenses', expense.toFixed(2)]);
-  out.push(['Net (Income - Expenses)', net.toFixed(2)]);
-  out.push(['Savings Rate %', income > 0 ? (net / income * 100).toFixed(1) : 'n/a']);
-  out.push(['Transactions', rows.length]);
-  out.push([]);
-  out.push(['Date', 'Type', 'Category', 'Description', 'Amount', 'Cash Flow', 'Notes', 'Source']);
-  rows.forEach(r => {
-    const signed = r.type === 'income' ? r.amount : -r.amount; // income +, expense -, so SUM() nets out
-    out.push([r.date, r.type, r.category, r.description, r.amount.toFixed(2), signed.toFixed(2), r.notes || '', r.source || 'manual']);
+  // ---- workbook ----
+  const CLR = { dark:'FF181818', green:'FFB4F754', red:'FFFF5252', yellow:'FFFFD166', blue:'FF52B4FF', purple:'FFC084FC', white:'FFFFFFFF', black:'FF000000', grey:'FFEFEFEF' };
+  const MONEY = '#,##0.00';
+  const wb = new ExcelJS.Workbook();
+  const ws = wb.addWorksheet(label.replace(/[\\\/\?\*\[\]:]/g, '-').slice(0, 31));
+  ws.columns = [{width:12},{width:12},{width:20},{width:30},{width:12},{width:12},{width:32}];
+
+  const head = (vals, fill, fontColor) => {
+    const r = ws.addRow(vals);
+    r.eachCell(c => {
+      c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: fill } };
+      c.font = { bold:true, color:{ argb: fontColor || CLR.black } };
+    });
+    return r;
+  };
+  const sectionTitle = (txt, fill, fontColor) => {
+    ws.addRow([]);
+    const r = ws.addRow([txt]);
+    ws.mergeCells(r.number, 1, r.number, 7);
+    const c = r.getCell(1);
+    c.fill = { type:'pattern', pattern:'solid', fgColor:{ argb: fill } };
+    c.font = { bold:true, size:12, color:{ argb: fontColor || CLR.black } };
+  };
+
+  // TITLE
+  const t = ws.addRow(['JO BUDGET \u2014 ' + label]);
+  ws.mergeCells(t.number, 1, t.number, 7);
+  t.getCell(1).font = { bold:true, size:16 };
+  const g = ws.addRow(['Generated ' + new Date().toLocaleString()]);
+  g.getCell(1).font = { size:9, color:{ argb:'FF888888' } };
+
+  // SUMMARY
+  sectionTitle('SUMMARY', CLR.dark, CLR.white);
+  [['Total Income', income, MONEY], ['Total Expenses', expense, MONEY], ['Net (Income - Expenses)', net, MONEY],
+   ['Savings Rate %', income > 0 ? net / income : null, '0.0%'], ['Transactions', rows.length, null]
+  ].forEach(([k, v, fmt]) => {
+    const r = ws.addRow([k, v === null ? 'n/a' : v]);
+    r.getCell(1).font = { bold:true };
+    if (fmt && v !== null) r.getCell(2).numFmt = fmt;
   });
 
-  // \ufeff BOM = Google Sheets/Excel read UTF-8 right (emoji, accents). \r\n = safest for imports.
-  const csv = out.map(row => row.map(csvCell).join(',')).join('\r\n');
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8;' }));
-  a.download = fname; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
-  setMsg(true, '\u2713 Exported ' + rows.length + ' rows \u2014 ' + label);
+  // aggregate by category for one type
+  const aggBy = (type) => {
+    const m = {};
+    rows.filter(r => r.type === type).forEach(r => {
+      if (!m[r.category]) m[r.category] = { total:0, count:0 };
+      m[r.category].total += r.amount; m[r.category].count++;
+    });
+    return Object.entries(m).sort((a, b) => b[1].total - a[1].total);
+  };
+
+  // INCOME STREAMS (your business buckets, pulled straight from categories)
+  sectionTitle('INCOME STREAMS', CLR.green);
+  head(['Stream', 'Total', '% of Income', 'Payments'], CLR.grey);
+  aggBy('income').forEach(([cat, v]) => {
+    const r = ws.addRow([cat, v.total, income > 0 ? v.total / income : 0, v.count]);
+    r.getCell(2).numFmt = MONEY; r.getCell(3).numFmt = '0.0%';
+  });
+
+  // EXPENSES BY CATEGORY
+  sectionTitle('EXPENSES BY CATEGORY', CLR.red, CLR.white);
+  head(['Category', 'Total', '% of Expenses', 'Transactions'], CLR.grey);
+  aggBy('expense').forEach(([cat, v]) => {
+    const r = ws.addRow([cat, v.total, expense > 0 ? v.total / expense : 0, v.count]);
+    r.getCell(2).numFmt = MONEY; r.getCell(3).numFmt = '0.0%';
+  });
+
+  // MONTH BY MONTH (only for multi-month periods)
+  if (multiMonth) {
+    sectionTitle('MONTH BY MONTH', CLR.blue);
+    head(['Month', 'Income', 'Expenses', 'Net'], CLR.grey);
+    const mm = {};
+    rows.forEach(r => {
+      const k = (r.date || '').slice(0, 7);
+      if (!mm[k]) mm[k] = { i:0, e:0 };
+      r.type === 'income' ? mm[k].i += r.amount : mm[k].e += r.amount;
+    });
+    Object.keys(mm).sort().forEach(k => {
+      const r = ws.addRow([k, mm[k].i, mm[k].e, mm[k].i - mm[k].e]);
+      [2, 3, 4].forEach(n => r.getCell(n).numFmt = MONEY);
+    });
+  }
+
+  // BANK / TAX REFERENCE — blank slots for future-you (tax returns, work history)
+  sectionTitle('BANK / TAX REFERENCE \u2014 fill in later', CLR.yellow);
+  ['Tax Return Filed (Y/N)', 'AGI / Net Income Reported', 'Tax Docs Link (Drive)', 'Work History Notes', 'Bank Notes'].forEach(k => {
+    const r = ws.addRow([k, '']);
+    r.getCell(1).font = { bold:true };
+    r.getCell(2).border = { bottom: { style:'thin', color:{ argb:'FF888888' } } };
+    ws.mergeCells(r.number, 2, r.number, 4);
+  });
+
+  // TRANSACTIONS (no Source column)
+  sectionTitle('TRANSACTIONS', CLR.purple);
+  head(['Date', 'Type', 'Category', 'Description', 'Amount', 'Cash Flow', 'Notes'], CLR.dark, CLR.white);
+  rows.forEach(r => {
+    const signed = r.type === 'income' ? r.amount : -r.amount;
+    const row = ws.addRow([r.date, r.type, r.category, r.description, r.amount, signed, r.notes || '']);
+    row.getCell(5).numFmt = MONEY;
+    row.getCell(6).numFmt = MONEY;
+    row.getCell(6).font = { color:{ argb: signed >= 0 ? 'FF1E7A1E' : 'FFC00000' } };
+  });
+
+  // ---- download ----
+  try {
+    const buf = await wb.xlsx.writeBuffer();
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob([buf], { type:'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }));
+    a.download = fname; a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+    setMsg(true, '\u2713 Exported ' + rows.length + ' rows \u2014 ' + label);
+  } catch (e) {
+    setMsg(false, 'Export failed: ' + e.message);
+  }
 }
 function clearAll() {
   if (!confirm('Delete ALL data? Cannot be undone.')) return;
