@@ -991,20 +991,57 @@ const SRC_CLASSES = {"Fakes Trade":"fake","J Tradez":"jt","Enrich Trades":"enric
 /* ─── MARKET CONTEXT EVENTS ─── */
 /* Each entry: {date:"YYYY-MM-DD", type:"econ|fomc|holiday|market|news|mom|personal", icon, label, tip} */
 const MARKET_EVENTS = [
-  // — May 2026 sample data —
-  {date:"2026-05-10", type:"mom",     icon:"💐", label:"Mother's Day",     tip:"Mother's Day"},
-  {date:"2026-05-12", type:"econ",    icon:"📊", label:"CPI",              tip:"CPI release — inflation print"},
-  {date:"2026-05-13", type:"econ",    icon:"📈", label:"PPI",              tip:"PPI release — producer prices"},
-  {date:"2026-05-25", type:"market",  icon:"🇺🇸", label:"Memorial Day",     tip:"US market closed"},
-  // typical FOMC days for 2026 — adjust as needed
-  {date:"2026-01-28", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-03-18", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-04-29", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-06-17", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-07-29", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-09-16", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-11-04", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
-  {date:"2026-12-16", type:"fomc",    icon:"🏛", label:"FOMC",             tip:"FOMC rate decision"},
+  {date:"2026-05-10", type:"mom", icon:"💐", label:"Mother's Day", tip:"Mother's Day"},
+  {date:"2026-05-25", type:"market", icon:"🇺🇸", label:"Memorial Day", tip:"US market closed"},
+  // RED FOLDER - FOMC 2026
+  {date:"2026-01-28", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC decision 2:00pm ET. No trade."},
+  {date:"2026-03-18", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC + dot plot 2:00pm ET. No trade."},
+  {date:"2026-04-29", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC decision 2:00pm ET. No trade."},
+  {date:"2026-06-17", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC + dot plot 2:00pm ET. No trade."},
+  {date:"2026-07-29", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC decision 2:00pm ET. No trade."},
+  {date:"2026-09-16", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC + dot plot 2:00pm ET. No trade."},
+  {date:"2026-10-28", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC decision 2:00pm ET. No trade."},
+  {date:"2026-12-09", type:"fomc", red:true, icon:"🏛", label:"FOMC", tip:"RED FOLDER - FOMC + dot plot 2:00pm ET. No trade."},
+  // RED FOLDER - CPI 2026
+  {date:"2026-01-13", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-02-13", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-03-11", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-04-10", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-05-12", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-06-10", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-07-14", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-08-12", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-09-11", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-10-14", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-11-10", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  {date:"2026-12-10", type:"econ", red:true, icon:"📊", label:"CPI", tip:"RED FOLDER - CPI 8:30am ET. No trade."},
+  // RED FOLDER - NFP 2026
+  {date:"2026-01-09", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-02-11", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-03-06", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-04-03", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. Good Friday, market closed."},
+  {date:"2026-05-08", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-06-05", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-07-02", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-08-07", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-09-04", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-10-02", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-11-06", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  {date:"2026-12-04", type:"econ", red:true, icon:"👷", label:"NFP", tip:"RED FOLDER - Jobs Report 8:30am ET. No trade."},
+  // RED FOLDER - PPI 2026
+  {date:"2026-01-14", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-01-30", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-02-27", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-03-18", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. Same day as FOMC."},
+  {date:"2026-04-14", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-05-13", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-06-11", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-07-15", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-08-13", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-09-10", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-10-15", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-11-13", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
+  {date:"2026-12-15", type:"econ", red:true, icon:"📈", label:"PPI", tip:"RED FOLDER - PPI 8:30am ET. No trade."},
   // major US market holidays 2026
   {date:"2026-01-01", type:"market",  icon:"🎉", label:"New Year",         tip:"US market closed"},
   {date:"2026-01-19", type:"market",  icon:"✊", label:"MLK Day",           tip:"US market closed"},
@@ -1020,7 +1057,7 @@ const MARKET_EVENTS = [
 ];
 /* Helper: pull all events for a YYYY-MM-DD */
 function eventsForDate(ds){
-  return MARKET_EVENTS.filter(e=>e.date===ds).concat(getCustomEvents().filter(e=>e.date===ds));
+  return MARKET_EVENTS.filter(e=>e.date===ds).concat(getCustomEvents().filter(e=>e.date===ds)).sort((a,b)=>(b.red?1:0)-(a.red?1:0));
 }
 /* User can add their own events stored in localStorage */
 function getCustomEvents(){ try{ return JSON.parse(localStorage.getItem('jo_trades_events')||'[]'); }catch{ return []; } }
@@ -1363,7 +1400,7 @@ function renderCalendarInto(data,gridId,sideId,totalId,acct){
     const ds=`${year}-${String(month+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
     const info=byDay[ds]; const isToday=ds===todayStr;
     const events = eventsForDate(ds);
-    let cls='cal-day'+(isToday?' today':'')+(events.length?' event-day':'');
+    let cls='cal-day'+(isToday?' today':'')+(events.length?' event-day':'')+(events.some(e=>e.red)?' red-day':'');
     let inner=`<div class="cal-day-num">${d}</div>`;
     if(info){
       const pos=info.pnl>0,neg=info.pnl<0;
@@ -1377,7 +1414,7 @@ function renderCalendarInto(data,gridId,sideId,totalId,acct){
       const extra = events.length - visible.length;
       let badges = visible.map(ev=>{
         const safe = (ev.tip||ev.label).replace(/"/g,'&quot;');
-        return `<span class="cal-event ${ev.type}" title="${safe}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`;
+        return `<span class="cal-event ${ev.type}${ev.red?' red':''}" title="${safe}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`;
       }).join('');
       if(extra>0){
         const moreTitle = events.slice(2).map(e=>e.label).join(' · ').replace(/"/g,'&quot;');
@@ -1430,7 +1467,7 @@ function openDayModal(dateStr,acct){
   if(evs.length){
     evHtml = `<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(245,176,71,.06),rgba(245,176,71,.01));border:1px dashed rgba(245,176,71,.3)">`
       + `<div style="width:100%;font-family:var(--mono);font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--gold);margin-bottom:4px">Market Context</div>`
-      + evs.map(ev=>`<span class="cal-event ${ev.type}" title="${(ev.tip||'').replace(/"/g,'&quot;')}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`).join('')
+      + evs.map(ev=>`<span class="cal-event ${ev.type}${ev.red?' red':''}" title="${(ev.tip||'').replace(/"/g,'&quot;')}"><span class="ce-i">${ev.icon}</span>${ev.label}</span>`).join('')
       + `</div>`;
   }
   if(!trades.length){
